@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, } from "react";
+import { Link, useLocation,useNavigate } from "react-router-dom";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const location = useLocation(); 
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const isAuthPage = location.pathname === "/login" || location.pathname === "/signup" || location.pathname ==="/admin";
 
@@ -19,6 +20,14 @@ export default function Navbar() {
   }, []);
 
   const shouldShowSolid = scrolled || isAuthPage;
+
+   const handleadmin = () => {
+    console.log("heloo varsha")
+    
+
+    // simple navigate
+     window.location.href = "https://the-galaxy-dashboard.vercel.app/"
+  };
 
   return (
     <nav
@@ -69,16 +78,16 @@ export default function Navbar() {
           >
             Login
           </Link>
-          <Link
-            to="/rooms"
+          <button
+            onClick={handleadmin}
             className={`px-5 py-2 rounded-sm text-sm font-bold tracking-wide transition-all duration-300 ${
               shouldShowSolid
                 ? "bg-[#C6A45C] text-white hover:bg-black"
                 : "bg-white text-black hover:bg-[#C6A45C] hover:text-white"
             }`}
           >
-            BOOK NOW
-          </Link>
+            Admin
+          </button>
         </div>
       </div>
     </nav>
