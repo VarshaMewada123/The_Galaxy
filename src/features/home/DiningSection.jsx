@@ -43,7 +43,7 @@ export default function DiningSection() {
           >
             <div className="relative z-10 aspect-[4/3] overflow-hidden rounded-sm">
               <img
-                src="https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974"
+                src="public/images/hdining.jpg"
                 alt="Fine Dining"
                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2s]"
               />

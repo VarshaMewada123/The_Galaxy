@@ -10,7 +10,7 @@ export default function HomePage() {
       <HeroSection />
       <RoomSection />
       <DiningSection />
-      <ExperienceSection />
+      {/* <ExperienceSection /> */}
       <TestimonialSection />
     </main>
   );

@@ -23,7 +23,7 @@ function RoomsHero() {
         poster="/images/rooms-poster.jpg"
         className="absolute inset-0 w-full h-full object-cover z-0"
       >
-        <source src="/videos/rooms-hero.mp4" type="video/mp4" />
+        <source src="/videos/Galaxy Day Shoot.mp4" type="video/mp4" />
       </video>
 
       <div className="absolute inset-0 bg-black/40 z-10" />

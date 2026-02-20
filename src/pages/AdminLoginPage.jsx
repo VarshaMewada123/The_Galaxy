@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-
+import axiosClient from "@/api/axiosClient";
 import { isValidEmail } from "@/utils/validators";
-import { adminLogin, saveAdminSession } from "@/features/admin/admin.auth";
 
 export default function AdminLogin() {
-  const navigate = useNavigate();
+  const ADMIN_APP_URL = import.meta.env.VITE_ADMIN_APP_URL;
+
+  if (!ADMIN_APP_URL) {
+    throw new Error("VITE_ADMIN_APP_URL is not defined in environment variables");
+  }
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,52 +21,58 @@ export default function AdminLogin() {
     password: "",
   });
 
-const handleLogin = async (e) => {
-  e.preventDefault();
+  const handleLogin = async (e) => {
+    e.preventDefault();
 
-  const { email, password } = formData;
+    const { email, password } = formData;
 
-  if (!email || !password) {
-    return setError("All fields are required");
-  }
+    if (!email || !password) {
+      return setError("All fields are required");
+    }
 
-  if (!isValidEmail(email)) {
-    return setError("Enter a valid email address");
-  }
+    if (!isValidEmail(email)) {
+      return setError("Enter a valid email address");
+    }
 
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-    const data = await adminLogin({ email, password });
+      // 🔐 Login request (cookie will be set by backend)
+      await axiosClient.post("/admin/login", {
+        email,
+        password,
+      });
 
-    // ✅ save token & admin info
-    saveAdminSession(data);
+      // 🚀 Redirect to admin dashboard app
+      // 🚀 Redirect to admin dashboard app
+        window.location.href = `${ADMIN_APP_URL}/admin/dashboard`;
 
-    // ✅ REDIRECT TO DASHBOARD (PORT 3001)
-    window.location.href = "http://localhost:3001/admin/dashboard";
-  } catch (err) {
-    setError(err.response?.data?.message || "Login failed");
-  } finally {
-    setLoading(false);
-  }
-};
 
+    } catch (err) {
+      setError(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen flex items-center justify-center bg-[#FAF9F6] px-4">
-      <motion.div className="bg-white p-10 max-w-[440px] w-full border">
-        <h2 className="text-3xl text-center mb-8">Admin Sign In</h2>
+      <motion.div className="bg-white p-10 max-w-[440px] w-full border shadow-lg">
+        <h2 className="text-3xl text-center mb-8 font-semibold">
+          Admin Sign In
+        </h2>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <input
             type="email"
             placeholder="Admin Email"
             value={formData.email}
+            autoComplete="email"
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value.trim() })
             }
-            className="w-full border-b py-2 outline-none"
+            className="w-full border-b py-2 outline-none focus:border-black"
           />
 
           <div className="relative">
@@ -71,32 +80,37 @@ const handleLogin = async (e) => {
               type={showPassword ? "text" : "password"}
               placeholder="Password"
               value={formData.password}
+              autoComplete="current-password"
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
-              className="w-full border-b py-2 pr-10 outline-none"
+              className="w-full border-b py-2 pr-10 outline-none focus:border-black"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-2 bottom-2"
             >
-              {showPassword ? <EyeOff /> : <Eye />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm text-center">{error}</p>
+          )}
 
           <button
             disabled={loading}
-            className="w-full bg-black text-white py-3 disabled:opacity-50"
+            className="w-full bg-black text-white py-3 transition hover:opacity-90 disabled:opacity-50"
           >
             {loading ? "Verifying..." : "Login"}
           </button>
         </form>
 
         <p className="text-center mt-6 text-sm">
-          <Link to="/">Exit</Link>
+          <Link to="/" className="hover:underline">
+            Exit
+          </Link>
         </p>
       </motion.div>
     </div>

@@ -4,6 +4,8 @@ import { Suspense, lazy } from "react";
 import ScrollToTop from "../layout/ScrollToTop";
 import FrontLayout from "../layout/FrontLayout";
 import Loader from "../components/loaders/Loader";
+import Privacy from "../pages/PrivacyPolicyy";
+import TermsOfUse from "../pages/TermsOfUse";
 
 
 const HomePage = lazy(() => import("../pages/HomePage"));
@@ -13,6 +15,7 @@ const RoomsPage = lazy(() => import("../pages/RoomsPage"));
 const OffersPage = lazy(() => import("../pages/OffersPage"));
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 const SignupPage = lazy(() => import("../pages/SignupPage"));
+
 
 
 const AdminLoginPage = lazy(() =>
@@ -35,6 +38,10 @@ export default function AppRouter() {
             <Route path="offers" element={<OffersPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="signup" element={<SignupPage />} />
+            <Route path="/privacyy" element={<Privacy />} />
+            <Route path="/terms-of-use" element={<TermsOfUse />} />
+
+
           </Route>
 
           {/* ADMIN LOGIN */}

@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import ErrorBoundary from "./app/ErrorBoundary";
 import AppRouter from "./app/router";
 
+
 function App() {
   return (
     <ErrorBoundary>

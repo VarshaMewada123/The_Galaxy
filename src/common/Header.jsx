@@ -6,7 +6,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup" || location.pathname ==="/admin";
+  const isAuthPage = location.pathname === "/login" || location.pathname === "/signup" || location.pathname ==="/admin"||location.pathname ==="/privacyy"||location.pathname ==="/terms-of-use";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,9 +44,9 @@ export default function Navbar() {
           <span
             className={`${shouldShowSolid ? "text-black" : "text-white"} transition-colors duration-300`}
           >
-            The
+            Hotel
           </span>
-          <span className="text-[#C6A45C]">Galaxy</span>
+          <span className="text-[#C6A45C]"> The Galaxy</span>
         </Link>
 
         <ul
