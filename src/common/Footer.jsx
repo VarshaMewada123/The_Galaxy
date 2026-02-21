@@ -183,7 +183,7 @@ const Footer = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setOpenNewsletter(true)}
-              className="py-4 px-10 text-xs font-black tracking-widest text-slate-900 shadow-xl"
+              className=" py-2 rounded-sm py-4 px-10 text-xs font-black tracking-widest text-slate-900 shadow-xl"
               style={{ backgroundColor: goldColor }}
             >
               SUBSCRIBE
@@ -191,9 +191,9 @@ const Footer = () => {
           </motion.div>
         </motion.div>
 
-        {/* BOTTOM BAR */}
-        <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 text-[11px] uppercase tracking-[0.2em]">
-          <p className="opacity-50">© {currentYear} Hotel The Galaxy. All rights reserved.</p>
+  
+        <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-8 text-[12px]  tracking-[0.2em]">
+          <p className="opacity-80">© {currentYear} Hotel The Galaxy. All rights reserved.</p>
 
           <div className="flex gap-10">
             <button 

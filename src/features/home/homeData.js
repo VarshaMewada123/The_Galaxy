@@ -1,7 +1,8 @@
 export const heroImages = [
   // "public/images/image.png",
-  "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070",
-  "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=2080",
+  "public/images/g.png",
+  "public/images/home4.jpeg",
+  "public/images/DSC00677.jpg.jpeg",
   "public/images/home4.jpeg",
 ];
 

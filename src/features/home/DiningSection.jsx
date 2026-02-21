@@ -28,11 +28,18 @@ export default function DiningSection() {
               every meal is a masterpiece waiting to be savored.
             </p>
 
-            <Link to="/dining">
-              <button className="px-10 py-4 bg-[#111] text-white text-xs font-bold tracking-[0.2em] hover:bg-[#C6A45C] transition-all duration-300">
-                EXPLORE DINING & MENUS
-              </button>
+                      <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <Link
+              to="/dining"
+              className="inline-block bg-[#C6A45C] hover:bg-transparent hover:border-2 hover:border-[#C6A45C] text-white hover:text-[#C6A45C] px-12 py-6 transition-all duration-500 font-bold tracking-widest text-sm uppercase rounded-full"
+            >
+              EXPLORE DINING & MENUS
             </Link>
+          </motion.div>
           </motion.div>
 
           <motion.div
@@ -43,7 +50,7 @@ export default function DiningSection() {
           >
             <div className="relative z-10 aspect-[4/3] overflow-hidden rounded-sm">
               <img
-                src="public/images/hdining.jpg"
+                src="public/images/d.png"
                 alt="Fine Dining"
                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-[2s]"
               />
