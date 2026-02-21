@@ -6,8 +6,7 @@ import FrontLayout from "../layout/FrontLayout";
 import Loader from "../components/loaders/Loader";
 import Privacy from "../pages/PrivacyPolicyy";
 import TermsOfUse from "../pages/TermsOfUse";
-import Menu from "../pages/Menu";
-import Checkout from "../pages/Checkout";
+
 
 
 const HomePage = lazy(() => import("../pages/HomePage"));
@@ -42,8 +41,7 @@ export default function AppRouter() {
             <Route path="signup" element={<SignupPage />} />
             <Route path="/privacyy" element={<Privacy />} />
             <Route path="/terms-of-use" element={<TermsOfUse />} />
-            <Route path="/menu" element={<Menu />} />
-            <Route path="/checkout" element={<Checkout />} />
+
 
           </Route>
 
