@@ -1,16 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-
-const isValidEmail = (email) => {
-  const regex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
-  return regex.test(email);
-};
-
-const isValidPhone = (phone) => {
-  const regex = /^[0-9]{10}$/;
-  return regex.test(phone);
-};
+import { isValidPhone } from "../utils/validators";
+import { isValidEmail } from "../utils/validators";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -40,7 +32,7 @@ export default function Signup() {
     }
 
     if (signupMethod === "email" && !isValidEmail(identifier)) {
-      setError("Enter a valid lowercase email (example@gmail.com)");
+      setError("Enter a valid lowercase email");
       return;
     }
 

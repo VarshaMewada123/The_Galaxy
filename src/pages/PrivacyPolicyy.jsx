@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 
 const PrivacyPolicy = () => {
-  // Animation Variants
   const containerVars = {
     hidden: { opacity: 0 },
     visible: {
@@ -12,47 +11,59 @@ const PrivacyPolicy = () => {
 
   const itemVars = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   return (
     <div className="bg-white text-stone-800 min-h-screen pt-32 pb-20 px-6 sm:px-10">
-      <motion.div 
+      <motion.div
         className="max-w-4xl mx-auto"
         initial="hidden"
         animate="visible"
         variants={containerVars}
       >
-        {/* Header Section */}
-        <motion.div variants={itemVars} className="border-b border-stone-200 pb-10 mb-12">
+        <motion.div
+          variants={itemVars}
+          className="border-b border-stone-200 pb-10 mb-12"
+        >
           <h1 className="text-4xl md:text-5xl font-serif text-stone-900 mb-4 tracking-tight">
             Privacy <span style={{ color: "#C6A45C" }}>Policy</span>
           </h1>
           <p className="text-sm uppercase tracking-[0.2em] text-stone-500 font-medium">
-            Effective Date: {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })}
+            Effective Date:{" "}
+            {new Date().toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })}
           </p>
         </motion.div>
 
-        {/* Content Sections */}
         <div className="space-y-12">
           {sections.map((section, index) => (
-            <motion.section 
-              key={index} 
-              variants={itemVars}
-              className="group"
-            >
+            <motion.section key={index} variants={itemVars} className="group">
               <div className="flex items-baseline gap-4 mb-4">
-                <span className="text-xs font-bold tracking-widest" style={{ color: "#C6A45C" }}>
+                <span
+                  className="text-xs font-bold tracking-widest"
+                  style={{ color: "#C6A45C" }}
+                >
                   {index + 1 < 10 ? `0${index + 1}` : index + 1}
                 </span>
                 <h2 className="text-xl md:text-2xl text-stone-900 font-semibold tracking-wide">
-                  {section.title.split('. ')[1] || section.title}
+                  {section.title.split(". ")[1] || section.title}
                 </h2>
               </div>
-              
+
               <div className="pl-0 md:pl-8 border-l-0 md:border-l border-stone-100 group-hover:border-[#C6A45C] transition-colors duration-500">
                 {section.content.map((para, i) => (
-                  <p key={i} className="mb-4 leading-relaxed text-stone-600 text-[15px] md:text-[16px] max-w-3xl">
+                  <p
+                    key={i}
+                    className="mb-4 leading-relaxed text-stone-600 text-[15px] md:text-[16px] max-w-3xl"
+                  >
                     {para}
                   </p>
                 ))}
@@ -61,18 +72,32 @@ const PrivacyPolicy = () => {
           ))}
         </div>
 
-        {/* Contact Support Card */}
-        <motion.div 
+        <motion.div
           variants={itemVars}
           className="mt-20 p-8 md:p-12 text-center border"
           style={{ borderColor: "#C6A45C40", backgroundColor: "#fcfbf7" }}
         >
-          <h3 className="text-2xl font-serif mb-4 text-stone-900">Privacy Concerns?</h3>
-          <p className="text-stone-600 mb-6">If you have any questions about how we handle your data, our legal team is here to help.</p>
+          <h3 className="text-2xl font-serif mb-4 text-stone-900">
+            Privacy Concerns?
+          </h3>
+          <p className="text-stone-600 mb-6">
+            If you have any questions about how we handle your data, our legal
+            team is here to help.
+          </p>
           <div className="flex flex-col md:flex-row justify-center gap-6 text-sm font-medium tracking-wide">
-            <a href="mailto:info@thegalaxyhotel.com" className="hover:text-[#C6A45C] transition-colors border-b border-transparent hover:border-[#C6A45C]">EMAIL US</a>
+            <a
+              href="mailto:info@thegalaxyhotel.com"
+              className="hover:text-[#C6A45C] transition-colors border-b border-transparent hover:border-[#C6A45C]"
+            >
+              EMAIL US
+            </a>
             <span className="hidden md:block text-stone-300">|</span>
-            <a href="tel:+910000000000" className="hover:text-[#C6A45C] transition-colors border-b border-transparent hover:border-[#C6A45C]">CALL CONCIERGE</a>
+            <a
+              href="tel:+910000000000"
+              className="hover:text-[#C6A45C] transition-colors border-b border-transparent hover:border-[#C6A45C]"
+            >
+              CALL CONCIERGE
+            </a>
           </div>
         </motion.div>
       </motion.div>
@@ -81,10 +106,6 @@ const PrivacyPolicy = () => {
 };
 
 export default PrivacyPolicy;
-
-/* ==============================
-   PRIVACY POLICY CONTENT
-============================== */
 
 const sections = [
   {

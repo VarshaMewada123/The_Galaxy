@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
+    "@reduxjs/toolkit": "^2.11.2",
     "@tailwindcss/typography": "^0.5.19",
     "@tanstack/react-query": "^5.90.20",
     "@tanstack/react-query-devtools": "^5.91.3",
@@ -25,6 +26,7 @@
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
     "react-intersection-observer-hook": "^4.0.1",
+    "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
     "swiper": "^12.0.3",
     "zustand": "^5.0.11"

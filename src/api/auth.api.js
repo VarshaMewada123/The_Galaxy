@@ -52,3 +52,9 @@ export const logoutAdmin = () => {
 
   window.location.href = "/admin/login";
 };
+
+export const sendOtpApi = (data) =>
+  axiosClient.post("/auth/send-otp", data);
+
+export const verifyOtpApi = (data) =>
+  axiosClient.post("/auth/verify-otp", data);

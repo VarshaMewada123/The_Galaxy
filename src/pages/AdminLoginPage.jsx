@@ -9,7 +9,9 @@ export default function AdminLogin() {
   const ADMIN_APP_URL = import.meta.env.VITE_ADMIN_APP_URL;
 
   if (!ADMIN_APP_URL) {
-    throw new Error("VITE_ADMIN_APP_URL is not defined in environment variables");
+    throw new Error(
+      "VITE_ADMIN_APP_URL is not defined in environment variables",
+    );
   }
 
   const [loading, setLoading] = useState(false);
@@ -37,18 +39,12 @@ export default function AdminLogin() {
     try {
       setLoading(true);
       setError("");
-
-      // 🔐 Login request (cookie will be set by backend)
       await axiosClient.post("/admin/login", {
         email,
         password,
       });
 
-      // 🚀 Redirect to admin dashboard app
-      // 🚀 Redirect to admin dashboard app
-        window.location.href = `${ADMIN_APP_URL}/admin/dashboard`;
-
-
+      window.location.href = `${ADMIN_APP_URL}/admin/dashboard`;
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
@@ -95,9 +91,7 @@ export default function AdminLogin() {
             </button>
           </div>
 
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
           <button
             disabled={loading}

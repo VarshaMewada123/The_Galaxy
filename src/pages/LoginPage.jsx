@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
-import { isValidEmail } from "../utils/validators";
-import { isValidPhone } from "../utils/validators";
-
-/* ================= component ================= */
+import { isValidEmail, isValidPhone } from "../utils/validators";
+import { useAuthStore } from "@/store/auth.store";
+import { useCartStore } from "@/store/cart.store";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const redirectPath = location.state?.redirect || "/";
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const clearCart = useCartStore((s) => s.clearCart);
 
   const [loginMethod, setLoginMethod] = useState("email");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,8 +24,6 @@ export default function Login() {
     identifier: "",
     password: "",
   });
-
-  /* ================= handlers ================= */
 
   const handleMethodChange = (method) => {
     setLoginMethod(method);
@@ -42,6 +44,39 @@ export default function Login() {
   const handlePasswordChange = (e) => {
     setFormData((prev) => ({ ...prev, password: e.target.value }));
     setError("");
+  };
+  const autoPlaceOrderAfterLogin = async (cartData) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
+        "http://localhost:5000/api/orders",
+        cartData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      clearCart();
+
+      navigate("/order-success", {
+        state: {
+          order: res.data.data,
+          autoPlaced: true,
+          message: "Order placed successfully after login!",
+        },
+        replace: true,
+      });
+    } catch (err) {
+      console.error("Auto order failed:", err);
+      navigate("/checkout", {
+        state: {
+          error: "Order placement failed. Please try again from checkout.",
+        },
+      });
+    }
   };
 
   const handleLogin = async () => {
@@ -73,8 +108,18 @@ export default function Login() {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+      setAuth(data.user, data.token);
 
-      navigate("/");
+      const { autoPlaceOrder, cartData, redirect } = location.state || {};
+
+      if (autoPlaceOrder && cartData) {
+        await autoPlaceOrderAfterLogin(cartData);
+      } else {
+        navigate(redirect || "/", {
+          replace: true,
+          state: location.state,
+        });
+      }
     } catch (err) {
       setError(
         err?.response?.data?.message || "Server error. Please try again.",
@@ -83,8 +128,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
-  /* ================= UI ================= */
 
   return (
     <div className="h-screen w-full flex items-center justify-center bg-[#FAF9F6] px-4 relative overflow-hidden">
@@ -96,7 +139,6 @@ export default function Login() {
         transition={{ duration: 0.6 }}
         className="bg-white shadow-sm border border-gray-100 p-6 md:p-10 w-full max-w-[440px]"
       >
-        {/* Heading */}
         <div className="text-center mb-8">
           <motion.span className="text-[#C6A45C] uppercase tracking-[0.3em] text-[9px] font-bold">
             The Rivora Experience
@@ -106,7 +148,6 @@ export default function Login() {
           </motion.h2>
         </div>
 
-        {/* Method Switch */}
         <div className="flex mb-6 bg-gray-50 p-1">
           {["email", "phone"].map((method) => (
             <button
@@ -119,12 +160,11 @@ export default function Login() {
                   : "text-gray-400"
               }`}
             >
-              {method}
+              {method === "email" ? "Email" : "Phone"}
             </button>
           ))}
         </div>
 
-        {/* Form */}
         <form
           className="space-y-5"
           onSubmit={(e) => {
@@ -140,7 +180,7 @@ export default function Login() {
             }
             value={formData.identifier}
             onChange={handleChange}
-            className="w-full border-b py-2 outline-none"
+            className="w-full border-b py-2 outline-none focus:border-[#C6A45C] focus:border-b-2"
           />
 
           <div className="relative">
@@ -149,33 +189,38 @@ export default function Login() {
               placeholder="••••••••"
               value={formData.password}
               onChange={handlePasswordChange}
-              className="w-full border-b py-2 pr-10 outline-none"
+              className="w-full border-b py-2 pr-10 outline-none focus:border-[#C6A45C] focus:border-b-2"
             />
             <button
               type="button"
               onClick={() => setShowPassword((p) => !p)}
-              className="absolute right-2 top-2 text-gray-400"
+              className="absolute right-2 top-2 text-gray-400 hover:text-gray-600"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
 
           {error && (
-            <p className="text-red-500 text-[11px] text-center">{error}</p>
+            <p className="text-red-500 text-[11px] text-center bg-red-50 p-2 rounded">
+              {error}
+            </p>
           )}
 
           <button
             disabled={loading}
-            className="w-full bg-black text-white py-4 text-[10px] font-bold tracking-widest uppercase disabled:opacity-60"
+            className="w-full bg-[#1a1a1a] text-white py-4 text-[10px] font-bold tracking-[0.3em] uppercase hover:bg-black disabled:opacity-60 disabled:cursor-not-allowed transition-all"
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Signing In..." : "Sign In Securely"}
           </button>
         </form>
 
         <div className="mt-8 text-center">
           <p className="text-gray-400 text-[12px]">
-            Don't have an account?
-            <Link to="/signup" className="text-[#C6A45C] font-bold ml-1">
+            Don't have an account?{" "}
+            <Link
+              to="/signup"
+              className="text-[#C6A45C] font-bold ml-1 hover:underline"
+            >
               Create membership
             </Link>
           </p>
