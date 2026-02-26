@@ -1,60 +1,62 @@
 import axiosClient from "./axiosClient";
+import {
+  saveAdminSession,
+  clearAdminSession,
+} from "../services/adminSession.service";
 
-// 🔐 Admin Login
 export const loginAdmin = async (credentials) => {
-  const res = await axiosClient.post(
-    "/admin/login",
-    credentials
-  );
+  const { data } = await axiosClient.post("/admin/login", credentials);
 
-  const { tokens, admin } = res.data;
-
-  return {
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    user: admin,
+  const session = {
+    accessToken: data.tokens.accessToken,
+    refreshToken: data.tokens.refreshToken,
+    user: data.admin,
   };
+
+  saveAdminSession(session);
+
+  return session;
 };
 
-// 💾 Save Session
-export const saveAdminSession = ({
-  accessToken,
-  refreshToken,
-  user,
-}) => {
-  localStorage.setItem("adminAccessToken", accessToken);
-  localStorage.setItem("adminRefreshToken", refreshToken);
-  localStorage.setItem("adminUser", JSON.stringify(user));
-};
-
-// 📦 Get Session
-export const getAdminSession = () => {
-  try {
-    const token = localStorage.getItem("adminAccessToken");
-    const user = localStorage.getItem("adminUser");
-
-    if (!token || !user) return null;
-
-    return {
-      token,
-      user: JSON.parse(user),
-    };
-  } catch {
-    return null;
-  }
-};
-
-// 🚪 Logout
 export const logoutAdmin = () => {
-  localStorage.removeItem("adminAccessToken");
-  localStorage.removeItem("adminRefreshToken");
-  localStorage.removeItem("adminUser");
-
-  window.location.href = "/admin/login";
+  clearAdminSession();
 };
 
-export const sendOtpApi = (data) =>
-  axiosClient.post("/auth/send-otp", data);
+export const signupApi = async (payload) => {
+  const { data } = await axiosClient.post("/auth/signup", payload);
+  return data;
+};
 
-export const verifyOtpApi = (data) =>
-  axiosClient.post("/auth/verify-otp", data);
+export const sendOtpApi = async (payload) => {
+  const { data } = await axiosClient.post("/auth/send-otp", payload);
+  return data;
+};
+
+export const loginApi = async (payload) => {
+  const { data } = await axiosClient.post("/auth/login", payload);
+  return data;
+};
+
+export const verifyOtpApi = async (payload) => {
+  const response = await axiosClient.post("/auth/verify-otp", payload);
+
+  const body = response.data;
+
+  const user =
+    body?.user ||
+    body?.data?.user ||
+    body?.data?.data?.user;
+
+  const token =
+    body?.token ||
+    body?.accessToken ||
+    body?.data?.token ||
+    body?.data?.accessToken;
+
+  if (!user || !token) {
+    console.error("VERIFY OTP RESPONSE:", body);
+    throw new Error("Invalid authentication response");
+  }
+
+  return { user, token };
+};

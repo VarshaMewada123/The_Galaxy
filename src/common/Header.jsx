@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const VITE_ADMIN_APP_URL = import.meta.env.VITE_ADMIN_APP_URL;
+const ADMIN_URL = import.meta.env.VITE_ADMIN_APP_URL;
 
 const NAV_LINKS = [
   { name: "Home", path: "/" },
@@ -23,7 +23,7 @@ const AUTH_PATHS = [
   "/contact",
 ];
 
-export default function Navbar() {
+const Header = memo(function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
@@ -32,7 +32,8 @@ export default function Navbar() {
   const shouldShowSolid = isScrolled || isAuthPage || isMobileMenuOpen;
 
   const handleScroll = useCallback(() => {
-    setIsScrolled(window.scrollY > 70);
+    const scrolled = window.scrollY > 70;
+    setIsScrolled((prev) => (prev !== scrolled ? scrolled : prev));
   }, []);
 
   useEffect(() => {
@@ -42,25 +43,31 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
-  }, [location]);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+  }, [isMobileMenuOpen]);
 
   const handleAdminRedirect = () => {
-    if (VITE_ADMIN_APP_URL) window.location.href = VITE_ADMIN_APP_URL;
+    if (ADMIN_URL) window.location.href = ADMIN_URL;
   };
 
   return (
     <nav
-      className={`fixed top-0 left-0 w-full z-[100] transition-all duration-300 ${
+      className={`fixed inset-x-0 top-0 z-[100] transition-all duration-300 ${
         shouldShowSolid ? "bg-white shadow-md py-4" : "bg-transparent py-4"
       }`}
     >
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           to="/"
-          className="text-2xl font-serif tracking-wide cursor-pointer hover:scale-105 transition-transform duration-200"
+          className="text-2xl font-serif tracking-wide transition-transform duration-200 hover:scale-105"
         >
           <span
-            className={`${shouldShowSolid ? "text-black" : "text-white"} transition-colors duration-300`}
+            className={`transition-colors duration-300 ${
+              shouldShowSolid ? "text-black" : "text-white"
+            }`}
           >
             Hotel
           </span>
@@ -73,13 +80,13 @@ export default function Navbar() {
           }`}
         >
           {NAV_LINKS.map((link) => {
-            const isActive = location.pathname === link.path;
+            const active = location.pathname === link.path;
             return (
               <li key={link.path}>
                 <Link
                   to={link.path}
                   className={`transition-colors duration-200 ${
-                    isActive ? "text-[#C6A45C]" : "hover:text-[#C6A45C]"
+                    active ? "text-[#C6A45C]" : "hover:text-[#C6A45C]"
                   }`}
                 >
                   {link.name}
@@ -89,7 +96,7 @@ export default function Navbar() {
           })}
         </ul>
 
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           <Link
             to="/login"
             className={`hidden sm:block text-sm font-medium transition-colors ${
@@ -105,7 +112,7 @@ export default function Navbar() {
 
           <button
             onClick={handleAdminRedirect}
-            className={`px-5 py-2 rounded-sm text-sm font-bold tracking-wide transition-all duration-300 ${
+            className={`px-5 py-2 text-sm font-bold tracking-wide rounded-sm transition-all duration-300 ${
               shouldShowSolid
                 ? "bg-[#C6A45C] text-white hover:bg-black"
                 : "bg-white text-black hover:bg-[#C6A45C] hover:text-white"
@@ -115,15 +122,17 @@ export default function Navbar() {
           </button>
 
           <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden focus:outline-none"
+            aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            onClick={() => setIsMobileMenuOpen((p) => !p)}
+            className="md:hidden"
           >
             {isMobileMenuOpen ? (
-              <X className="text-black" size={28} />
+              <X size={28} className="text-black" />
             ) : (
               <Menu
-                className={shouldShowSolid ? "text-black" : "text-white"}
                 size={28}
+                className={shouldShowSolid ? "text-black" : "text-white"}
               />
             )}
           </button>
@@ -133,10 +142,11 @@ export default function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "100vh" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="absolute top-0 left-0 w-full bg-white z-[-1] overflow-hidden flex flex-col pt-24 px-10 md:hidden"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 bg-white pt-24 px-8 md:hidden overflow-y-auto"
           >
             <div className="flex flex-col gap-8">
               {NAV_LINKS.map((link) => (
@@ -152,7 +162,9 @@ export default function Navbar() {
                   {link.name}
                 </Link>
               ))}
+
               <hr />
+
               <Link
                 to="/login"
                 className={`text-lg uppercase tracking-widest ${
@@ -169,4 +181,6 @@ export default function Navbar() {
       </AnimatePresence>
     </nav>
   );
-}
+});
+
+export default Header;

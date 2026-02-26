@@ -28,18 +28,18 @@ export default function DiningSection() {
               every meal is a masterpiece waiting to be savored.
             </p>
 
-                      <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Link
-              to="/dining"
-              className="inline-block bg-[#C6A45C] hover:bg-transparent hover:border-2 hover:border-[#C6A45C] text-white hover:text-[#C6A45C] px-12 py-6 transition-all duration-500 font-bold tracking-widest text-sm uppercase rounded-full"
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
             >
-              EXPLORE DINING & MENUS
-            </Link>
-          </motion.div>
+              <Link
+                to="/dining"
+                className="inline-block bg-[#C6A45C] hover:bg-transparent hover:border-2 hover:border-[#C6A45C] text-white hover:text-[#C6A45C] px-12 py-6 transition-all duration-500 font-bold tracking-widest text-sm uppercase rounded-full"
+              >
+                EXPLORE DINING & MENUS
+              </Link>
+            </motion.div>
           </motion.div>
 
           <motion.div

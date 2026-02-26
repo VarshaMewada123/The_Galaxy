@@ -1,7 +1,11 @@
-export default function Loader() {
+import { memo } from "react";
+
+const Loader = memo(function Loader() {
   return (
-    <div className="flex items-center justify-center h-screen">
-      <div className="w-10 h-10 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+    <div className="flex min-h-screen w-full items-center justify-center">
+      <div className="h-10 w-10 animate-spin rounded-full border-2 border-neutral-300 border-t-neutral-900" />
     </div>
   );
-}
+});
+
+export default Loader;

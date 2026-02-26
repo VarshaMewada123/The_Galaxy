@@ -9,6 +9,10 @@ if (!BASE_URL) {
 const axiosClient = axios.create({
   baseURL: "http://localhost:5000/api/v1",
   withCredentials: true,
+  timeout: 15000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 axiosClient.interceptors.response.use(

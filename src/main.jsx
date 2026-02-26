@@ -1,35 +1,33 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
-import store from "./store/store";
+import { PersistGate } from "redux-persist/integration/react";
 
+import { queryClient } from "./app/queryClient"; // ✅ FIXED IMPORT
+import { store, persistor } from "./store/store";
 import App from "./App";
 import "./index.css";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 2,
-      gcTime: 1000 * 60 * 10,
-    },
-    mutations: {
-      retry: 0,
-    },
-  },
-});
+const container = document.getElementById("root");
 
-ReactDOM.createRoot(document.getElementById("root")).render(
+if (!container) {
+  throw new Error("Root container missing");
+}
+
+ReactDOM.createRoot(container).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <App />
+        <PersistGate
+          loading={<div className="min-h-screen w-full" />}
+          persistor={persistor}
+        >
+          <Suspense fallback={<div className="min-h-screen w-full" />}>
+            <App />
+          </Suspense>
+        </PersistGate>
       </Provider>
-{/* {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />} */}
     </QueryClientProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 );
