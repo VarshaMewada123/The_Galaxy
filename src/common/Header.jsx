@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, memo } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom"; // useNavigate add kiya
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const ADMIN_URL = import.meta.env.VITE_ADMIN_APP_URL;
 
 const NAV_LINKS = [
   { name: "Home", path: "/" },
@@ -16,7 +14,7 @@ const NAV_LINKS = [
 const AUTH_PATHS = [
   "/login",
   "/signup",
-  "/admin",
+  "/admin", // Ye check karega ki /admin/login par header solid rahe
   "/privacyy",
   "/terms-of-use",
   "/checkout",
@@ -27,8 +25,10 @@ const Header = memo(function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate(); // Navigation ke liye
 
-  const isAuthPage = AUTH_PATHS.includes(location.pathname);
+  // Check if current path starts with any auth paths (like /admin/login)
+  const isAuthPage = AUTH_PATHS.some(path => location.pathname.startsWith(path));
   const shouldShowSolid = isScrolled || isAuthPage || isMobileMenuOpen;
 
   const handleScroll = useCallback(() => {
@@ -49,8 +49,10 @@ const Header = memo(function Header() {
     document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
   }, [isMobileMenuOpen]);
 
-  const handleAdminRedirect = () => {
-    if (ADMIN_URL) window.location.href = ADMIN_URL;
+  // Handle Admin Button Click
+  const handleAdminClick = () => {
+    // Ye aapko internal route pe le jayega: http://localhost:3000/admin/login
+    navigate("/admin");
   };
 
   return (
@@ -74,6 +76,7 @@ const Header = memo(function Header() {
           <span className="text-[#C6A45C]"> The Galaxy</span>
         </Link>
 
+        {/* Desktop Navigation */}
         <ul
           className={`hidden md:flex gap-8 text-sm uppercase tracking-wider font-medium transition-colors duration-300 ${
             shouldShowSolid ? "text-gray-800" : "text-white"
@@ -111,7 +114,7 @@ const Header = memo(function Header() {
           </Link>
 
           <button
-            onClick={handleAdminRedirect}
+            onClick={handleAdminClick}
             className={`px-5 py-2 text-sm font-bold tracking-wide rounded-sm transition-all duration-300 ${
               shouldShowSolid
                 ? "bg-[#C6A45C] text-white hover:bg-black"
@@ -139,6 +142,7 @@ const Header = memo(function Header() {
         </div>
       </div>
 
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
