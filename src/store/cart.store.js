@@ -1,77 +1,79 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 
-export const useCartStore = create(
-  persist(
-    (set, get) => ({
-      items: [],
+const getInitialCart = () => {
+  const saved = localStorage.getItem("cart");
 
-      addItem: (product) => {
-        const items = get().items;
-        const existing = items.find((i) => i._id === product._id);
+  if (saved) {
+    console.log("🟡 CART LOADED FROM STORAGE:", JSON.parse(saved));
+    return JSON.parse(saved);
+  }
 
-        if (existing) {
-          set({
-            items: items.map((i) =>
-              i._id === product._id
-                ? { ...i, qty: i.qty + 1 }
-                : i
-            ),
-          });
-        } else {
-          set({
-            items: [
-              ...items,
-              {
-                _id: product._id,
-                name: product.name,
-                basePrice: product.basePrice,
-                images: product.images || [],
-                qty: 1,
-              },
-            ],
-          });
-        }
-      },
+  return { items: [] };
+};
 
-      removeItem: (id) =>
-        set((state) => ({
-          items: state.items.filter((i) => i._id !== id),
-        })),
+export const useCartStore = create((set, get) => ({
+  cart: getInitialCart(),
 
-      increaseQty: (id) =>
-        set((state) => ({
-          items: state.items.map((i) =>
-            i._id === id ? { ...i, qty: i.qty + 1 } : i
-          ),
-        })),
+  addItem: (item) => {
+    console.log("🟢 ADDING ITEM TO CART:", item);
 
-      decreaseQty: (id) =>
-        set((state) => ({
-          items: state.items
-            .map((i) =>
-              i._id === id ? { ...i, qty: i.qty - 1 } : i
-            )
-            .filter((i) => i.qty > 0),
-        })),
+    const cart = { ...get().cart };
 
-      clearCart: () => set({ items: [] }),
+    const existing = cart.items.find(
+      (i) => i.dishId === item._id
+    );
 
-      getSubtotal: () =>
-        get().items.reduce(
-          (total, item) => total + item.basePrice * item.qty,
-          0
-        ),
+    if (existing) {
+      existing.quantity += 1;
+      console.log("🔁 Quantity Increased");
+    } else {
+      cart.items.push({
+        dishId: item._id,
+        name: item.name,
+        price: item.basePrice,
+        image: item.images?.[0]?.url,
+        quantity: 1,
+      });
 
-      getTotalItems: () =>
-        get().items.reduce((acc, item) => acc + item.qty, 0),
-    }),
-    {
-      name: "cart-storage",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({
-        items: state.items,
-      }),
+      console.log("➕ New Item Added");
     }
-  )
-);
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    console.log("💾 CART SAVED:", cart);
+
+    set({ cart });
+  },
+
+removeItem: (dishId) => {
+  set((state) => {
+    const existingItem = state.cart.items.find(i => i.dishId === dishId);
+    
+    if (existingItem.quantity > 1) {
+      // Quantity kam karo
+      return {
+        cart: {
+          ...state.cart,
+          items: state.cart.items.map(i => 
+            i.dishId === dishId ? { ...i, quantity: i.quantity - 1 } : i
+          )
+        }
+      };
+    } else {
+   
+      return {
+        cart: {
+          ...state.cart,
+          items: state.cart.items.filter(i => i.dishId !== dishId)
+        }
+      };
+    }
+  });
+},
+
+  clearCart: () => {
+    console.log("🧹 CART CLEARED");
+    localStorage.removeItem("cart");
+    set({ cart: { items: [] } });
+  },
+}));

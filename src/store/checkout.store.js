@@ -36,7 +36,7 @@ export const useCheckoutStore = create(
         }),
     }),
     {
-      name: "checkout-storage", // localStorage key
+      name: "checkout-storage",
     }
   )
 );

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import DiningSections from "../features/dining/DiningSections";
+import FloatingCartBar from "@/components/cart/FloatingCartBar";
 
 export default function DiningPage() {
   return (
@@ -26,7 +27,7 @@ export default function DiningPage() {
           </h1>
         </div>
       </section>
-
+      <FloatingCartBar />
       <DiningSections />
     </main>
   );

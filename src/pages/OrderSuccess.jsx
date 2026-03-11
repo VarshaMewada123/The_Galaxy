@@ -1,173 +1,97 @@
-// import React from "react";
-// import { useLocation, useNavigate } from "react-router-dom";
-// import { motion } from "framer-motion";
-// import { ShoppingBag, CheckCircle, ArrowRight } from "lucide-react";
-
-// export default function OrderSuccess() {
-//   const navigate = useNavigate();
-//   const { state } = useLocation();
-//   const order = state?.order;
-//   const message = state?.message || "Order placed successfully!";
-
-//   return (
-//     <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center p-4 md:p-8">
-//       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-//         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-[#F5F1E9] rounded-full blur-3xl opacity-50" />
-//         <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-[#F5F1E9] rounded-full blur-3xl opacity-50" />
-//       </div>
-
-//       <motion.div
-//         initial={{ scale: 0.9, opacity: 0 }}
-//         animate={{ scale: 1, opacity: 1 }}
-//         transition={{ duration: 0.5, ease: "easeOut" }}
-//         className="relative bg-white border border-[#F5F1E9] rounded-[2.5rem] p-8 md:p-12 text-center shadow-[0_20px_50px_rgba(198,164,92,0.1)] max-w-lg w-full"
-//       >
-//         <div className="w-20 h-20 md:w-24 md:h-24 bg-[#F5F1E9] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8">
-//           <CheckCircle size={40} className="text-[#C6A45C]" strokeWidth={1.5} />
-//         </div>
-
-//         <h1 className="text-3xl md:text-4xl font-serif font-medium text-gray-900 mb-3">
-//           Thank You!
-//         </h1>
-//         <p className="text-base md:text-lg text-gray-500 mb-6 font-light">
-//           {message}
-//         </p>
-
-//         {order ? (
-//           <div className="space-y-4 mb-8">
-//             <div className="inline-block px-4 py-1 rounded-full bg-[#F5F1E9] text-[#A68A4B] text-xs font-bold tracking-widest uppercase">
-//               Order Confirmed
-//             </div>
-//             <p className="text-2xl md:text-3xl font-serif font-bold text-[#C6A45C]">
-//               #{order.orderNumber}
-//             </p>
-
-//             <div className="bg-[#FAF9F6] border border-[#F5F1E9] p-5 md:p-6 rounded-2xl">
-//               <div className="flex justify-between items-center mb-1">
-//                 <span className="text-gray-400 text-sm">Amount Paid</span>
-//                 <span className="text-gray-900 font-semibold">
-//                   ₹{order.pricing.total.toLocaleString()}
-//                 </span>
-//               </div>
-//               <p className="text-xs text-[#A68A4B] text-right italic font-light">
-//                 Arriving in 30-45 mins
-//               </p>
-//             </div>
-//           </div>
-//         ) : (
-//           <div className="h-20" />
-//         )}
-
-//         <div className="flex flex-col gap-3">
-//           <button
-//             onClick={() => navigate("/orders")}
-//             className="w-full bg-[#1a1a1a] text-white py-4 px-8 text-xs font-bold tracking-[0.2em] uppercase rounded-xl hover:bg-[#C6A45C] transition-all duration-300 shadow-xl flex items-center justify-center group"
-//           >
-//             View Orders
-//             <ArrowRight
-//               size={16}
-//               className="ml-2 group-hover:translate-x-1 transition-transform"
-//             />
-//           </button>
-
-//           <button
-//             onClick={() => navigate("/")}
-//             className="w-full bg-transparent text-gray-400 py-3 text-xs font-bold tracking-[0.1em] uppercase rounded-xl hover:text-[#C6A45C] transition-all"
-//           >
-//             Explore with Galaxy
-//           </button>
-//         </div>
-//       </motion.div>
-//     </div>
-//   );
-// }
-
-
-import React, { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, ShoppingBag, MapPin } from "lucide-react";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 export default function OrderSuccess() {
   const navigate = useNavigate();
-  const { state } = useLocation();
+  const location = useLocation();
+  const orderId = location.state?.orderId;
+  const orderNumber = location.state?.orderNumber;
 
-  const order = state?.order;
-  const message = state?.message || "Order placed successfully!";
+  const { width, height } = useWindowSize();
+
+  const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
-    if (!order) {
-      navigate("/", { replace: true });
-    }
-  }, [order, navigate]);
+    console.log("OrderSuccess orderId:", orderId);
+    console.log("OrderSuccess orderNumber:", orderNumber);
+  }, []);
 
-  if (!order) return null;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowConfetti(false);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center p-4 md:p-8">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-[#F5F1E9] rounded-full blur-3xl opacity-50" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-[#F5F1E9] rounded-full blur-3xl opacity-50" />
-      </div>
+    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center px-4 py-20 relative overflow-hidden">
+      {showConfetti && (
+        <Confetti
+          width={width}
+          height={height}
+          numberOfPieces={250}
+          recycle={false}
+        />
+      )}
 
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="relative bg-white border border-[#F5F1E9] rounded-[2.5rem] p-8 md:p-12 text-center shadow-[0_20px_50px_rgba(198,164,92,0.1)] max-w-lg w-full"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-lg w-full bg-white rounded-2xl shadow-xl border border-gray-100 p-8 text-center"
       >
-        <div className="w-20 h-20 md:w-24 md:h-24 bg-[#F5F1E9] rounded-full flex items-center justify-center mx-auto mb-6 md:mb-8">
-          <CheckCircle size={40} className="text-[#C6A45C]" strokeWidth={1.5} />
-        </div>
-
-        <h1 className="text-3xl md:text-4xl font-serif font-medium text-gray-900 mb-3">
-          Thank You!
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200, damping: 12 }}
+          className="flex justify-center mb-6"
+        >
+          <div className="bg-green-100 p-6 rounded-full">
+            <CheckCircle2 size={60} className="text-green-600" />
+          </div>
+        </motion.div>
+        <h1 className="text-3xl font-serif font-bold text-gray-900">
+          Order Confirmed
         </h1>
 
-        <p className="text-base md:text-lg text-gray-500 mb-6 font-light">
-          {message}
+        <p className="text-gray-500 mt-3 text-sm leading-relaxed">
+          Thank you for your order. Your delicious meal is now being prepared
+          and will be delivered shortly.
         </p>
-
-        <div className="space-y-4 mb-8">
-          <div className="inline-block px-4 py-1 rounded-full bg-[#F5F1E9] text-[#A68A4B] text-xs font-bold tracking-widest uppercase">
-            Order Confirmed
-          </div>
-
-          <p className="text-2xl md:text-3xl font-serif font-bold text-[#C6A45C]">
-            #{order.orderNumber}
+        {orderNumber && (
+          <p className="mt-3 text-sm font-semibold text-[#C6A45C]">
+            Order #{orderNumber}
+          </p>
+        )}
+        <div className="bg-[#C6A45C]/5 border border-[#C6A45C]/20 rounded-xl p-4 mt-6">
+          <p className="text-xs uppercase tracking-widest text-gray-400 font-bold">
+            Estimated Delivery
           </p>
 
-          <div className="bg-[#FAF9F6] border border-[#F5F1E9] p-5 md:p-6 rounded-2xl">
-            <div className="flex justify-between items-center mb-1">
-              <span className="text-gray-400 text-sm">Amount Paid</span>
-              <span className="text-gray-900 font-semibold">
-                ₹{order.pricing.total.toLocaleString()}
-              </span>
-            </div>
+          <p className="text-lg font-bold text-gray-900 mt-1">
+            30 - 40 Minutes
+          </p>
 
-            <p className="text-xs text-[#A68A4B] text-right italic font-light">
-              Arriving in 30-45 mins
-            </p>
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-2">
+            <MapPin size={14} />
+            Live tracking available
           </div>
         </div>
-
-        <div className="flex flex-col gap-3">
-          <button
-            onClick={() => navigate("/orders")}
-            className="w-full bg-[#1a1a1a] text-white py-4 px-8 text-xs font-bold tracking-[0.2em] uppercase rounded-xl hover:bg-[#C6A45C] transition-all duration-300 shadow-xl flex items-center justify-center group"
-          >
-            View Orders
-            <ArrowRight
-              size={16}
-              className="ml-2 group-hover:translate-x-1 transition-transform"
-            />
+        <div className="flex flex-col sm:flex-row gap-3 mt-8">
+          <button onClick={() => navigate(`/track-order/${orderId}`)}>
+            Track Order
           </button>
-
           <button
-            onClick={() => navigate("/")}
-            className="w-full bg-transparent text-gray-400 py-3 text-xs font-bold tracking-[0.1em] uppercase rounded-xl hover:text-[#C6A45C] transition-all"
+            onClick={() => navigate("/dining")}
+            className="flex-1 border border-gray-200 py-4 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition-all flex items-center justify-center gap-2"
           >
-            Explore with Galaxy
+            <ShoppingBag size={16} />
+            Order More
           </button>
         </div>
       </motion.div>

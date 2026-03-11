@@ -5,5 +5,6 @@ export const isValidEmail = (email) => {
 
 export const isValidPhone = (phone) => /^[0-9]{10}$/.test(phone);
 
-export const validateName = (name) =>
-  name.trim().length >= 2;
+export const validateName = (name) => name.trim().length >= 2;
+
+export const isValidOtp = (otp) => /^[0-9]{6}$/.test(otp);

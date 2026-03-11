@@ -17,11 +17,12 @@ const Login = lazy(() => import("../pages/auth/Login"));
 const Signup = lazy(() => import("../pages/auth/Signup"));
 const VerifyOtp = lazy(() => import("../pages/auth/VerifyOtp"));
 
-const Menu = lazy(() => import("../pages/Menu"));
 const Checkout = lazy(() => import("../pages/Checkout"));
-const Orders = lazy(() => import("../pages/Orders"));
-const OrderSuccess = lazy(() => import("../pages/OrderSuccess"));
 const Contact = lazy(() => import("../pages/Contactus"));
+import OrderSuccess from "@/pages/OrderSuccess";
+import TrackOrder from "@/pages/TrackOrder";
+import Profile from "../pages/Profile";
+import EditProfile from "../pages/EditProfile";
 
 const AdminLoginPage = lazy(() => import("../pages/AdminLoginPage"));
 
@@ -46,15 +47,15 @@ export default function AppRouter() {
           <Route path="signup" element={<Signup />} />
           <Route path="verify-otp" element={<VerifyOtp />} />
 
-          <Route path="menu" element={<Menu />} />
           <Route path="checkout" element={<Checkout />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="order-success" element={<OrderSuccess />} />
           <Route path="contact" element={<Contact />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/track-order/:orderId" element={<TrackOrder />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/edit-profile" element={<EditProfile />} />
         </Route>
 
         <Route path="admin" element={<AdminLoginPage />} />
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

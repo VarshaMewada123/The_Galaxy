@@ -1,801 +1,597 @@
-// import React, { useEffect, useState } from "react";
-// import { useCartStore } from "@/store/cart.store";
-// import { useAuthStore } from "@/store/auth.store";
-// import { useNavigate, useLocation } from "react-router-dom";
-// import axiosClient from "@/api/axiosClient";
-// import { motion, AnimatePresence } from "framer-motion";
-// import {
-//   ChevronLeft,
-//   Trash2,
-//   CreditCard,
-//   MapPin,
-//   ShoppingBag,
-//   CheckCircle,
-// } from "lucide-react";
-// import { State, City } from "country-state-city";
-// import { useCheckoutStore } from "@/store/checkout.store";
-// export default function Checkout() {
-//   const navigate = useNavigate();
-//   const location = useLocation();
-
-//   const { items, removeItem, increaseQty, decreaseQty, clearCart } = useCartStore();
-//   const { user, accessToken } = useAuthStore();
-
-//   const [states, setStates] = useState([]);
-//   const [cities, setCities] = useState([]);
-
-//   const [address, setAddress] = useState({
-//     fullName: "",
-//     phone: "",
-//     street: "",
-//     city: "",
-//     state: "",
-//     stateCode: "",
-//     pincode: "",
-//   });
-
-//   const [loading, setLoading] = useState(false);
-  
-//   const [showSuccess, setShowSuccess] = useState(false);
-//   const [successOrder, setSuccessOrder] = useState(null);
-
-//   useEffect(() => {
-//     const allStates = State.getStatesOfCountry("IN");
-//     setStates(allStates);
-//   }, []);
-
-//   useEffect(() => {
-//     if (address.stateCode) {
-//       const allCities = City.getCitiesOfState("IN", address.stateCode);
-//       setCities(allCities);
-//     } else {
-//       setCities([]);
-//     }
-//   }, [address.stateCode]);
-
-//   // Show error from login fallback
-//   useEffect(() => {
-//     if (location.state?.error) {
-//       alert(location.state.error);
-//       window.history.replaceState({}, document.title);
-//     }
-//   }, [location.state?.error]);
-
-//   const handleChange = (e) => {
-//     setAddress((prev) => ({
-//       ...prev,
-//       [e.target.name]: e.target.value,
-//     }));
-//   };
-
-//   const handleStateChange = (e) => {
-//     const selected = states.find((s) => s.isoCode === e.target.value);
-//     setAddress((prev) => ({
-//       ...prev,
-//       state: selected?.name || "",
-//       stateCode: selected?.isoCode || "",
-//       city: "",
-//     }));
-//   };
-
-//   const handleCityChange = (e) => {
-//     setAddress((prev) => ({
-//       ...prev,
-//       city: e.target.value,
-//     }));
-//   };
-
-//   const subtotal = items.reduce((acc, item) => acc + item.basePrice * item.qty, 0);
-//   const taxes = subtotal * 0.05;
-//   const total = subtotal + taxes;
-
-//   const validateAddress = () => {
-//     const nameRegex = /^[A-Za-z\s]{2,60}$/;
-//     const phoneRegex = /^[6-9]\d{9}$/;
-//     const pincodeRegex = /^[1-9][0-9]{5}$/;
-
-//     if (!nameRegex.test(address.fullName.trim())) return "Enter valid full name";
-//     if (!phoneRegex.test(address.phone)) return "Enter valid Indian mobile number";
-//     if (!address.street.trim() || address.street.length < 5) return "Enter valid street address";
-//     if (!address.state) return "Select state";
-//     if (!address.city) return "Select city";
-//     if (!pincodeRegex.test(address.pincode)) return "Enter valid Indian pincode";
-
-//     return null;
-//   };
-
-//   const handleCheckout = async () => {
- 
-//     if (!accessToken || !user) {
-//       const error = validateAddress();
-//       if (error) {
-//         alert(error);
-//         return;
-//       }
-
-//       navigate("/login", { 
-//         state: { 
-//           redirect: "/checkout",
-//           autoPlaceOrder: true,
-//           cartData: {
-//             items: items.map((i) => ({
-//               product: i._id,
-//               qty: i.qty,
-//               price: i.basePrice,
-//             })),
-//             address,
-//             pricing: { subtotal, taxes, total },
-//           }
-//         } 
-//       });
-//       return;
-//     }
-//     const error = validateAddress();
-//     if (error) {
-//       alert(error);
-//       return;
-//     }
-
-//     try {
-//       setLoading(true);
-//       const payload = {
-//         items: items.map((i) => ({
-//           product: i._id,
-//           qty: i.qty,
-//           price: i.basePrice,
-//         })),
-//         address,
-//         pricing: { subtotal, taxes, total },
-//       };
-
-//       const res = await axiosClient.post("/orders", payload);
-      
-//       clearCart();
-//       setSuccessOrder(res.data.data);
-//       setShowSuccess(true);
-      
-//     } catch (err) {
-//       alert("Order failed. Please try again.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleSuccessClose = () => {
-//     setShowSuccess(false);
-//     navigate("/orders", { replace: true });
-//   };
-
-//   if (items.length === 0) {
-//     return (
-//       <div className="h-screen flex flex-col items-center justify-center bg-[#FAF9F6] px-4">
-//         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-//           <ShoppingBag size={48} className="text-gray-300 mb-4" />
-//           <h2 className="text-2xl font-serif mb-4">Your cart is empty</h2>
-//           <button
-//             onClick={() => navigate("/dining")}
-//             className="bg-[#1a1a1a] text-white px-8 py-3 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#C6A45C]"
-//           >
-//             Return to Menu
-//           </button>
-//         </motion.div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen pb-20 mt-20">
-//       <AnimatePresence>
-//         {showSuccess && (
-//           <motion.div
-//             initial={{ opacity: 0 }}
-//             animate={{ opacity: 1 }}
-//             exit={{ opacity: 0 }}
-//             className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-//             onClick={handleSuccessClose}
-//           >
-//             <motion.div
-//               initial={{ scale: 0.7, opacity: 0 }}
-//               animate={{ scale: 1, opacity: 1 }}
-//               exit={{ scale: 0.7, opacity: 0 }}
-//               className="bg-white/95 backdrop-blur-xl rounded-3xl p-10 max-w-md w-full max-h-[90vh] overflow-hidden shadow-2xl border border-white/20"
-//               onClick={(e) => e.stopPropagation()}
-//             >
-//               <div className="text-center">
-//                 <motion.div 
-//                   initial={{ scale: 0 }}
-//                   animate={{ scale: 1 }}
-//                   className="w-24 h-24 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6 p-6"
-//                 >
-//                   <CheckCircle size={48} className="text-emerald-500" />
-//                 </motion.div>
-                
-//                 <h2 className="text-3xl font-serif font-bold mb-4 text-gray-800">
-//                   Order Placed!
-//                 </h2>
-//                 <p className="text-gray-600 mb-2 text-lg">
-//                   Order #{successOrder?.orderNumber || "123456"}
-//                 </p>
-//                 <p className="text-sm text-gray-500 mb-8">
-//                   Estimated delivery in 30-45 mins
-//                 </p>
-                
-//                 <div className="bg-gray-50 rounded-xl p-4 mb-8">
-//                   <div className="flex justify-between text-sm mb-2">
-//                     <span>Total Amount:</span>
-//                     <span className="font-bold text-[#C6A45C]">₹{total.toLocaleString()}</span>
-//                   </div>
-//                   <div className="flex justify-between text-xs text-gray-500">
-//                     <span>Payment:</span>
-//                     <span>COD</span>
-//                   </div>
-//                 </div>
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.02 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   onClick={handleSuccessClose}
-//                   className="w-full bg-[#1a1a1a] text-white py-4 text-xs font-bold tracking-[0.3em] uppercase rounded-xl shadow-lg hover:bg-black transition-all"
-//                 >
-//                   Track Order
-//                 </motion.button>
-                
-//                 <p className="text-[10px] text-gray-400 mt-4 tracking-wider">
-//                   You'll get order updates via SMS
-//                 </p>
-//               </div>
-//             </motion.div>
-//           </motion.div>
-//         )}
-//       </AnimatePresence>
-
-//       <div className="bg-white border-b border-gray-100 py-8 px-4">
-//         <div className="max-w-6xl mx-auto flex items-center justify-between">
-//           <button
-//             onClick={() => navigate(-1)}
-//             className="flex items-center gap-2 text-gray-500 hover:text-black transition-colors"
-//           >
-//             <ChevronLeft size={18} />
-//             <span className="text-[10px] font-bold tracking-widest uppercase">
-//               Back
-//             </span>
-//           </button>
-
-//           <h1 className="text-xl font-serif font-bold">Checkout</h1>
-//           <div className="w-10" />
-//         </div>
-//       </div>
-
-//       <div className="max-w-6xl mx-auto px-4 mt-8">
-//         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-//           <div className="lg:col-span-7">
-//             <h2 className="text-sm font-bold tracking-[0.2em] uppercase mb-6 text-[#C6A45C]">
-//               Your Selection
-//             </h2>
-
-//             <div className="space-y-4">
-//               <AnimatePresence mode="popLayout">
-//                 {items.map((item) => (
-//                   <motion.div
-//                     key={item._id}
-//                     layout
-//                     initial={{ opacity: 0, y: 10 }}
-//                     animate={{ opacity: 1, y: 0 }}
-//                     exit={{ opacity: 0, scale: 0.95 }}
-//                     className="bg-white p-6 border border-gray-100 rounded-xl hover:shadow-md transition-all flex gap-4 items-center"
-//                   >
-//                     <img
-//                       src={item.images?.[0] || "https://placehold.co/100x100"}
-//                       className="w-20 h-20 object-cover rounded-lg shadow-sm"
-//                       alt={item.name}
-//                     />
-
-//                     <div className="flex-1 min-w-0">
-//                       <h3 className="font-serif font-semibold text-lg truncate">{item.name}</h3>
-//                       <p className="text-[#C6A45C] font-bold mt-1 text-lg">
-//                         ₹{item.basePrice}
-//                       </p>
-
-//                       <div className="flex items-center gap-4 mt-4">
-//                         <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-//                           <button
-//                             onClick={() => decreaseQty(item._id)}
-//                             className="px-4 py-2 hover:bg-gray-50 transition-colors"
-//                           >
-//                             -
-//                           </button>
-//                           <span className="w-10 text-center font-bold py-2">{item.qty}</span>
-//                           <button
-//                             onClick={() => increaseQty(item._id)}
-//                             className="px-4 py-2 hover:bg-gray-50 transition-colors"
-//                           >
-//                             +
-//                           </button>
-//                         </div>
-
-//                         <button
-//                           onClick={() => removeItem(item._id)}
-//                           className="p-2 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-all"
-//                         >
-//                           <Trash2 size={18} />
-//                         </button>
-//                       </div>
-//                     </div>
-
-//                     <p className="font-bold text-xl whitespace-nowrap">
-//                       ₹{(item.basePrice * item.qty).toFixed(0)}
-//                     </p>
-//                   </motion.div>
-//                 ))}
-//               </AnimatePresence>
-//             </div>
-//           </div>
-
-//           <div className="lg:col-span-5">
-//             <div className="bg-white border border-gray-100 p-8 rounded-2xl shadow-lg sticky top-8">
-//               <h2 className="text-sm font-bold tracking-[0.2em] uppercase mb-6 text-[#C6A45C]">
-//                 Order Summary
-//               </h2>
-
-//               <form
-//                 onSubmit={(e) => {
-//                   e.preventDefault();
-//                   handleCheckout();
-//                 }}
-//                 className="space-y-4 mb-8"
-//               >
-//                 <div className="flex items-center gap-2 mb-4">
-//                   <MapPin size={20} className="text-[#C6A45C]" />
-//                   <span className="text-[11px] font-bold uppercase tracking-widest text-gray-700">
-//                     Delivery Address
-//                   </span>
-//                 </div>
-
-//                 <input
-//                   name="fullName"
-//                   type="text"
-//                   required
-//                   value={address.fullName}
-//                   onChange={handleChange}
-//                   placeholder="Full Name *"
-//                   className="w-full border border-gray-200 px-4 py-3 text-sm rounded-xl outline-none focus:border-[#C6A45C] focus:ring-2 focus:ring-[#C6A45C]/20 transition-all"
-//                 />
-
-//                 <input
-//                   name="phone"
-//                   type="tel"
-//                   required
-//                   value={address.phone}
-//                   onChange={handleChange}
-//                   placeholder="Phone Number *"
-//                   className="w-full border border-gray-200 px-4 py-3 text-sm rounded-xl outline-none focus:border-[#C6A45C] focus:ring-2 focus:ring-[#C6A45C]/20 transition-all"
-//                 />
-
-//                 <select
-//                   required
-//                   value={address.stateCode}
-//                   onChange={handleStateChange}
-//                   className="w-full border border-gray-200 px-4 py-3 text-sm rounded-xl outline-none focus:border-[#C6A45C] focus:ring-2 focus:ring-[#C6A45C]/20 transition-all"
-//                 >
-//                   <option value="">Select State</option>
-//                   {states.map((s) => (
-//                     <option key={s.isoCode} value={s.isoCode}>
-//                       {s.name}
-//                     </option>
-//                   ))}
-//                 </select>
-
-//                 <select
-//                   required
-//                   value={address.city}
-//                   onChange={handleCityChange}
-//                   disabled={!address.stateCode}
-//                   className="w-full border border-gray-200 px-4 py-3 text-sm rounded-xl outline-none focus:border-[#C6A45C] focus:ring-2 focus:ring-[#C6A45C]/20 transition-all disabled:bg-gray-50 disabled:cursor-not-allowed"
-//                 >
-//                   <option value="">Select City</option>
-//                   {cities.map((c) => (
-//                     <option key={c.name} value={c.name}>
-//                       {c.name}
-//                     </option>
-//                   ))}
-//                 </select>
-
-//                 <input
-//                   name="street"
-//                   type="text"
-//                   required
-//                   value={address.street}
-//                   onChange={handleChange}
-//                   placeholder="Street Address, House No. *"
-//                   className="w-full border border-gray-200 px-4 py-3 text-sm rounded-xl outline-none focus:border-[#C6A45C] focus:ring-2 focus:ring-[#C6A45C]/20 transition-all"
-//                 />
-
-//                 <input
-//                   name="pincode"
-//                   type="text"
-//                   required
-//                   value={address.pincode}
-//                   onChange={handleChange}
-//                   placeholder="Pincode *"
-//                   className="w-full border border-gray-200 px-4 py-3 text-sm rounded-xl outline-none focus:border-[#C6A45C] focus:ring-2 focus:ring-[#C6A45C]/20 transition-all"
-//                 />
-
-//                 <motion.button
-//                   whileHover={{ scale: 1.02 }}
-//                   whileTap={{ scale: 0.98 }}
-//                   type="submit"
-//                   disabled={loading || items.length === 0}
-//                   className="w-full bg-[#1a1a1a] text-white py-5 text-[11px] font-bold tracking-[0.3em] uppercase flex items-center justify-center gap-3 rounded-xl shadow-xl hover:shadow-2xl hover:bg-black focus:outline-none focus:ring-4 focus:ring-[#C6A45C]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-//                 >
-//                   {loading ? (
-//                     <>
-//                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-//                       Processing...
-//                     </>
-//                   ) : (
-//                     <>
-//                       Proceed to Payment
-//                       <CreditCard size={18} />
-//                     </>
-//                   )}
-//                 </motion.button>
-//               </form>
-
-//               <div className="space-y-3 text-sm">
-//                 <div className="flex justify-between py-2">
-//                   <span>Subtotal ({items.length} items)</span>
-//                   <span>₹{subtotal.toLocaleString()}</span>
-//                 </div>
-
-//                 <div className="flex justify-between py-2">
-//                   <span>Service Tax (5%)</span>
-//                   <span>₹{taxes.toLocaleString()}</span>
-//                 </div>
-
-//                 <div className="border-t pt-4 flex justify-between font-bold text-xl">
-//                   <span>Total</span>
-//                   <span className="text-[#C6A45C]">₹{total.toLocaleString()}</span>
-//                 </div>
-//               </div>
-
-//               <p className="text-center text-[9px] text-gray-400 uppercase tracking-widest mt-8 pt-6 border-t">
-//                 🔒 Secure SSL Encrypted Checkout
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useCartStore } from "@/store/cart.store";
 import { useCheckoutStore } from "@/store/checkout.store";
 import { useSelector } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axiosClient from "@/api/axiosClient";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
-  ChevronLeft,
-  Trash2,
-  CreditCard,
-  MapPin,
   ShoppingBag,
+  MapPin,
+  Plus,
+  CheckCircle2,
+  Home,
+  Briefcase,
+  X,
+  Navigation,
+  Trash2,
+  Edit2,
 } from "lucide-react";
-import { State, City } from "country-state-city";
+import { City } from "country-state-city";
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const { items, removeItem, increaseQty, decreaseQty, clearCart } =
-    useCartStore();
-
+  const shouldReduceMotion = useReducedMotion();
+  const { cart, removeItem, addItem, clearCart } = useCartStore();
   const { user, accessToken } = useSelector((state) => state.auth);
+  const { address, setAddressField, clearAddress } = useCheckoutStore();
 
-  const { address, setAddressField, clearAddress } =
-    useCheckoutStore();
-
-  const [states, setStates] = useState([]);
-  const [cities, setCities] = useState([]);
+  const [cities] = useState(() => City.getCitiesOfCountry("IN"));
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [authReady, setAuthReady] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [addressTag, setAddressTag] = useState("Home");
+
+  const items = useMemo(() => cart?.items || [], [cart]);
 
   useEffect(() => {
-    setStates(State.getStatesOfCountry("IN"));
+    if (!accessToken) {
+      navigate("/login", {
+        state: {
+          redirectPath: "/checkout",
+        },
+      });
+    }
+  }, [accessToken, navigate]);
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const res = await axiosClient.get("/addresses");
+        setSavedAddresses(res.data.addresses || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchAddresses();
   }, []);
 
-  useEffect(() => {
-    if (address.stateCode) {
-      setCities(
-        City.getCitiesOfState("IN", address.stateCode)
-      );
-    } else {
-      setCities([]);
-    }
-  }, [address.stateCode]);
-
-  useEffect(() => {
-    if (accessToken !== undefined) {
-      setAuthReady(true);
-    }
-  }, [accessToken]);
-
-  const handleChange = (e) => {
-    setAddressField(e.target.name, e.target.value);
-  };
-
-  const handleStateChange = (e) => {
-    const selected = states.find(
-      (s) => s.isoCode === e.target.value
-    );
-
-    setAddressField("state", selected?.name || "");
-    setAddressField("stateCode", selected?.isoCode || "");
-    setAddressField("city", "");
-  };
-
-  const handleCityChange = (e) => {
-    setAddressField("city", e.target.value);
-  };
-
   const subtotal = items.reduce(
-    (acc, item) => acc + item.basePrice * item.qty,
-    0
+    (acc, item) => acc + item.price * item.quantity,
+    0,
   );
-
   const taxes = subtotal * 0.05;
   const total = subtotal + taxes;
 
-  const validateAddress = () => {
-    const nameRegex = /^[A-Za-z\s]{2,60}$/;
-    const phoneRegex = /^[6-9]\d{9}$/;
-    const pincodeRegex = /^[1-9][0-9]{5}$/;
+  const isAddressValid = useMemo(() => {
+    const pinRegex = /^[1-9][0-9]{5}$/;
+    return (
+      address.street?.trim().length >= 3 &&
+      address.landmark?.trim().length >= 3 &&
+      address.city?.trim().length >= 2 &&
+      pinRegex.test(address.pincode)
+    );
+  }, [address]);
 
-    if (!nameRegex.test(address.fullName.trim()))
-      return "Enter valid full name";
-
-    if (!phoneRegex.test(address.phone))
-      return "Enter valid Indian mobile number";
-
-    if (!address.street.trim() || address.street.length < 5)
-      return "Enter valid street address";
-
-    if (!address.state) return "Select state";
-    if (!address.city) return "Select city";
-
-    if (!pincodeRegex.test(address.pincode))
-      return "Enter valid Indian pincode";
-
-    return null;
+  const handleAddNewAddress = async () => {
+    if (!isAddressValid) return;
+    try {
+      const payload = { ...address, label: addressTag };
+      let res;
+      if (editingId) {
+        res = await axiosClient.patch(`/addresses/${editingId}`, payload);
+        setSavedAddresses((prev) =>
+          prev.map((a) => (a._id === editingId ? res.data.address : a)),
+        );
+        setEditingId(null);
+      } else {
+        res = await axiosClient.post("/addresses", payload);
+        setSavedAddresses((prev) => [...prev, res.data.address]);
+      }
+      setSelectedAddress(res.data.address);
+      setShowForm(false);
+      clearAddress();
+    } catch (err) {
+      alert(err?.response?.data?.message || "Failed to save address");
+    }
   };
 
-  const handleCheckout = async () => {
-    if (!authReady) return;
-
-    const error = validateAddress();
-
-    if (error) {
-      alert(error);
-      return;
+  const handleDeleteAddress = async (id) => {
+    try {
+      await axiosClient.delete(`/addresses/${id}`);
+      setSavedAddresses((prev) => prev.filter((a) => a._id !== id));
+      if (selectedAddress?._id === id) setSelectedAddress(null);
+    } catch (err) {
+      alert("Failed to delete address");
     }
+  };
 
-    if (!accessToken || !user) {
-      navigate("/login", {
-        state: {
-          redirect: "/checkout",
-          autoPlaceOrder: true,
-        },
-      });
-      return;
-    }
+  const handleEditAddress = (addr) => {
+    setEditingId(addr._id);
+    setAddressField("street", addr.street);
+    setAddressField("landmark", addr.landmark);
+    setAddressField("city", addr.city);
+    setAddressField("pincode", addr.pincode);
+    setAddressTag(addr.label);
+    setShowForm(true);
+  };
 
-    if (loading) return;
+  const handleOrder = async () => {
+    if (!selectedAddress || loading) return;
+
+    setLoading(true);
 
     try {
-      setLoading(true);
-
       const payload = {
-        items: items.map((i) => ({
-          product: i._id,
-          qty: i.qty,
-          price: i.basePrice,
-        })),
-        address,
-        pricing: {
-          subtotal,
-          taxes,
-          total,
-        },
+        items: items.map((i) => {
+          if (i.type === "combo") {
+            return {
+              combo: i.comboId || i._id,
+              quantity: i.quantity,
+            };
+          }
+
+          return {
+            menuItem: i.dishId || i._id,
+            quantity: i.quantity,
+          };
+        }),
+        address: selectedAddress,
       };
 
       const res = await axiosClient.post("/orders", payload);
+
+      const order = res.data.data;
 
       clearCart();
       clearAddress();
 
       navigate("/order-success", {
-        replace: true,
         state: {
-          order: res.data.data,
-          message: "Order placed successfully!",
+          orderId: order._id,
+          orderNumber: order.orderNumber,
         },
       });
     } catch (err) {
-      const message =
-        err?.message ||
-        err?.response?.data?.message ||
-        "Order failed. Please try again.";
-
-      alert(message);
+      alert(err?.response?.data?.message || err?.message || "Order failed");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (
-      authReady &&
-      location.state?.autoPlaceOrder &&
-      accessToken &&
-      user
-    ) {
-      handleCheckout();
-      navigate(location.pathname, { replace: true });
-    }
-  }, [authReady, accessToken, user]);
+  const animationVariants = {
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, scale: 0.98 },
+  };
 
-  if (items.length === 0) {
+  if (!items.length) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#FAF9F6]">
-        <ShoppingBag size={48} className="text-gray-300 mb-4" />
-        <h2 className="text-2xl font-serif mb-4">
-          Your cart is empty
-        </h2>
-        <button
-          onClick={() => navigate("/dining")}
-          className="bg-[#1a1a1a] text-white px-8 py-3 text-xs font-bold tracking-[0.2em] uppercase"
+      <div className="min-h-[80vh] flex items-center justify-center p-6 bg-[#FAFAFA]">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={animationVariants}
+          className="max-w-md w-full text-center"
         >
-          Return to Menu
-        </button>
+          <div className="relative inline-block mb-6">
+            <ShoppingBag
+              size={80}
+              strokeWidth={1}
+              className="text-[#C6A45C]/20"
+            />
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="absolute -top-1 -right-1 bg-[#C6A45C] p-2 rounded-full text-white shadow-lg"
+            >
+              <Plus size={16} />
+            </motion.div>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-serif font-bold text-gray-800">
+            Your Cart is empty
+          </h2>
+          <p className="text-gray-500 mt-3 mb-10 text-base">
+            Add some delicacies to your cart to proceed.
+          </p>
+          <button
+            onClick={() => navigate("/dining")}
+            className="w-full sm:w-auto bg-[#C6A45C] text-white px-12 py-4 rounded-full font-bold hover:bg-[#b08f4b] transition-all shadow-xl active:scale-95"
+          >
+            Explore Menu
+          </button>
+        </motion.div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pb-20 mt-20">
-      <div className="bg-white border-b py-8 px-4">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-500"
-          >
-            <ChevronLeft size={18} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">
-              Back
-            </span>
-          </button>
+    <div className="min-h-screen bg-[#FAFAFA] pt-24 pb-12 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
+          <section className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between overflow-hidden">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="bg-green-100 p-2.5 rounded-full flex-shrink-0">
+                <CheckCircle2 className="text-green-600" size={20} />
+              </div>
+              <div className="truncate">
+                <p className="text-[10px] font-bold text-[#C6A45C] uppercase tracking-[0.2em] mb-0.5">
+                  Account
+                </p>
+                <p className="text-lg font-bold text-gray-900 truncate">
+                  {user?.fullName}
+                </p>
+              </div>
+            </div>
+          </section>
 
-          <h1 className="text-xl font-serif font-bold">
-            Checkout
-          </h1>
+          <section className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-8">
+              <MapPin className="text-[#C6A45C]" size={24} />
+              <h3 className="text-xl sm:text-2xl font-serif font-bold text-gray-900">
+                Delivery Address
+              </h3>
+            </div>
 
-          <div className="w-10" />
-        </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-7 space-y-4">
-          <AnimatePresence>
-            {items.map((item) => (
-              <motion.div
-                key={item._id}
-                layout
-                className="bg-white p-6 border rounded-xl flex gap-4 items-center"
-              >
-                <img
-                  src={item.images?.[0]}
-                  className="w-20 h-20 object-cover rounded-lg"
-                />
-
-                <div className="flex-1">
-                  <h3 className="font-serif font-semibold">
-                    {item.name}
-                  </h3>
-
-                  <p className="text-[#C6A45C] font-bold">
-                    ₹{item.basePrice}
-                  </p>
-
-                  <div className="flex gap-3 mt-3">
-                    <button onClick={() => decreaseQty(item._id)}>-</button>
-                    <span>{item.qty}</span>
-                    <button onClick={() => increaseQty(item._id)}>+</button>
-
-                    <button
-                      onClick={() => removeItem(item._id)}
-                      className="text-red-400"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+              {savedAddresses.map((addr) => (
+                <motion.div
+                  layout
+                  key={addr._id}
+                  onClick={() => setSelectedAddress(addr)}
+                  className={`group p-5 rounded-xl cursor-pointer border-2 transition-all relative flex flex-col justify-between h-full ${
+                    selectedAddress?._id === addr._id
+                      ? "border-[#C6A45C] bg-[#C6A45C]/5 shadow-md"
+                      : "border-gray-100 hover:border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={
+                        selectedAddress?._id === addr._id
+                          ? "text-[#C6A45C]"
+                          : "text-gray-400"
+                      }
                     >
-                      <Trash2 size={16} />
+                      {addr.label === "Home" ? (
+                        <Home size={18} />
+                      ) : addr.label === "Work" ? (
+                        <Briefcase size={18} />
+                      ) : (
+                        <MapPin size={18} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-sm mb-1">
+                        {addr.label}
+                      </p>
+                      <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
+                        {addr.street}, {addr.landmark}, {addr.city} -{" "}
+                        {addr.pincode}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex gap-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditAddress(addr);
+                        }}
+                        className="text-[10px] uppercase font-bold text-blue-500 hover:text-blue-700 flex items-center gap-1"
+                      >
+                        <Edit2 size={12} /> Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteAddress(addr._id);
+                        }}
+                        className="text-[10px] uppercase font-bold text-red-500 hover:text-red-700 flex items-center gap-1"
+                      >
+                        <Trash2 size={12} /> Delete
+                      </button>
+                    </div>
+                    {selectedAddress?._id === addr._id && (
+                      <CheckCircle2 size={16} className="text-green-600" />
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+
+              {!showForm && (
+                <button
+                  onClick={() => {
+                    setEditingId(null);
+                    clearAddress();
+                    setShowForm(true);
+                  }}
+                  className="border-2 border-dashed border-gray-200 p-8 rounded-xl flex flex-col items-center justify-center gap-3 group hover:border-[#C6A45C] hover:bg-gray-50 transition-all min-h-[140px]"
+                >
+                  <div className="bg-gray-100 group-hover:bg-[#C6A45C]/10 p-3 rounded-full transition-colors">
+                    <Plus
+                      className="text-gray-400 group-hover:text-[#C6A45C]"
+                      size={24}
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">
+                    Add New Address
+                  </span>
+                </button>
+              )}
+            </div>
+
+            <AnimatePresence mode="wait">
+              {showForm && (
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={animationVariants}
+                  className="bg-gray-50 p-5 sm:p-8 rounded-2xl border border-gray-200"
+                >
+                  <div className="flex justify-between items-center mb-6">
+                    <h4 className="font-bold text-gray-800 flex items-center gap-2">
+                      <Navigation size={18} className="text-[#C6A45C]" />
+                      {editingId ? "Update Address" : "New Delivery Details"}
+                    </h4>
+                    <button
+                      onClick={() => {
+                        setShowForm(false);
+                        setEditingId(null);
+                        clearAddress();
+                      }}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      <X size={24} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
+                        Flat / House No.
+                      </label>
+                      <input
+                        required
+                        name="street"
+                        value={address.street || ""}
+                        placeholder="e.g. 402, Royal Residency"
+                        className="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-[#C6A45C]/20 focus:border-[#C6A45C] outline-none p-3.5 rounded-xl text-sm transition-all"
+                        onChange={(e) =>
+                          setAddressField(e.target.name, e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
+                        Landmark
+                      </label>
+                      <input
+                        required
+                        name="landmark"
+                        value={address.landmark || ""}
+                        placeholder="e.g. Near City Mall"
+                        className="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-[#C6A45C]/20 focus:border-[#C6A45C] outline-none p-3.5 rounded-xl text-sm transition-all"
+                        onChange={(e) =>
+                          setAddressField(e.target.name, e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
+                        City
+                      </label>
+                      <select
+                        required
+                        name="city"
+                        value={address.city || ""}
+                        className="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-[#C6A45C]/20 focus:border-[#C6A45C] outline-none p-3.5 rounded-xl text-sm transition-all appearance-none cursor-pointer"
+                        onChange={(e) =>
+                          setAddressField(e.target.name, e.target.value)
+                        }
+                      >
+                        <option value="" disabled hidden>
+                          Select City
+                        </option>
+                        {cities.map((c, idx) => (
+                          <option key={idx} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
+                        Pincode (6 Digits)
+                      </label>
+                      <input
+                        required
+                        name="pincode"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="e.g. 400001"
+                        value={address.pincode || ""}
+                        className="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-[#C6A45C]/20 focus:border-[#C6A45C] outline-none p-3.5 rounded-xl text-sm transition-all"
+                        onChange={(e) =>
+                          setAddressField(
+                            e.target.name,
+                            e.target.value.replace(/\D/g, ""),
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 mt-6">
+                    {["Home", "Work", "Other"].map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        onClick={() => setAddressTag(tag)}
+                        className={`flex-1 py-3 rounded-xl border font-bold text-[10px] uppercase tracking-widest transition-all ${
+                          addressTag === tag
+                            ? "border-[#C6A45C] text-[#C6A45C] bg-white shadow-sm"
+                            : "border-gray-200 text-gray-400 bg-transparent hover:bg-gray-100"
+                        }`}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    disabled={!isAddressValid}
+                    onClick={handleAddNewAddress}
+                    className="w-full mt-6 py-4 bg-[#C6A45C] text-white font-black uppercase tracking-[0.2em] text-xs rounded-xl shadow-lg disabled:bg-gray-300 disabled:shadow-none transition-all active:scale-[0.98]"
+                  >
+                    {editingId
+                      ? "Update & Use Address"
+                      : "Save & Use This Address"}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
+
+          <section className="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-xl font-serif font-bold mb-8 text-gray-900">
+              Review Items
+            </h3>
+            <div className="space-y-6">
+              {items.map((item) => (
+                <div
+                  key={item.dishId}
+                  className="flex items-center justify-between gap-4 group"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="relative flex-shrink-0">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-gray-900 text-sm sm:text-base truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-[#C6A45C] font-black text-sm mt-0.5">
+                        ₹{item.price}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
+                    <button
+                      onClick={() => removeItem(item.dishId)}
+                      className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg transition-all font-bold"
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center font-black text-xs">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        addItem({
+                          _id: item.dishId,
+                          name: item.name,
+                          basePrice: item.price,
+                          images: [{ url: item.image }],
+                        })
+                      }
+                      className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-lg transition-all text-[#C6A45C] font-bold"
+                    >
+                      +
                     </button>
                   </div>
                 </div>
-
-                <p className="font-bold">
-                  ₹{item.basePrice * item.qty}
-                </p>
-              </motion.div>
-            ))}
-          </AnimatePresence>
+              ))}
+            </div>
+          </section>
         </div>
 
-        <div className="lg:col-span-5">
-          <div className="bg-white border p-8 rounded-2xl sticky top-8">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleCheckout();
-              }}
-              className="space-y-4"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <MapPin size={18} />
-                <span className="text-xs font-bold uppercase tracking-widest">
-                  Delivery Address
+        <aside className="lg:col-span-5 xl:col-span-4 sticky top-24">
+          <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-xl shadow-black/5 border border-gray-100">
+            <h4 className="text-xl font-serif font-bold mb-8 text-gray-900">
+              Bill Summary
+            </h4>
+            <div className="space-y-5">
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Item Total</span>
+                <span className="font-bold text-gray-900">
+                  ₹{subtotal.toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Delivery Fee</span>
+                <span className="text-green-600 font-black tracking-widest text-[10px] uppercase bg-green-50 px-2 py-1 rounded">
+                  Free
+                </span>
+              </div>
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Taxes & Charges (5%)</span>
+                <span className="font-bold text-gray-900">
+                  ₹{Math.round(taxes).toLocaleString()}
                 </span>
               </div>
 
-              <input name="fullName" value={address.fullName} onChange={handleChange} placeholder="Full Name" className="input" />
-              <input name="phone" value={address.phone} onChange={handleChange} placeholder="Phone" className="input" />
+              <div className="h-px bg-gray-100 my-6" />
 
-              <select value={address.stateCode} onChange={handleStateChange} className="input">
-                <option value="">Select State</option>
-                {states.map((s) => (
-                  <option key={s.isoCode} value={s.isoCode}>{s.name}</option>
-                ))}
-              </select>
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] uppercase font-black text-gray-400 tracking-[0.2em] mb-1">
+                    Grand Total
+                  </p>
+                  <p className="text-3xl sm:text-4xl font-serif font-black text-gray-900">
+                    ₹{Math.round(total).toLocaleString()}
+                  </p>
+                </div>
+                <div className="text-[10px] text-green-700 font-black bg-green-100 px-3 py-1.5 rounded-full uppercase tracking-tighter">
+                  Saved ₹45
+                </div>
+              </div>
 
-              <select value={address.city} onChange={handleCityChange} className="input">
-                <option value="">Select City</option>
-                {cities.map((c) => (
-                  <option key={c.name}>{c.name}</option>
-                ))}
-              </select>
-
-              <input name="street" value={address.street} onChange={handleChange} placeholder="Street Address" className="input" />
-              <input name="pincode" value={address.pincode} onChange={handleChange} placeholder="Pincode" className="input" />
-
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                disabled={loading}
-                className="w-full bg-black text-white py-4 uppercase text-xs tracking-widest"
+              <button
+                disabled={!selectedAddress || loading}
+                onClick={handleOrder}
+                className={`w-full mt-8 py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs sm:text-sm transition-all shadow-xl ${
+                  selectedAddress
+                    ? "bg-[#C6A45C] text-white hover:bg-[#b08f4b] hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 active:scale-95"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none"
+                }`}
               >
-                {loading ? "Processing..." : "Place Order"}
-                <CreditCard size={16} className="inline ml-2" />
-              </motion.button>
-            </form>
+                {loading ? (
+                  <div className="flex items-center justify-center gap-3">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1,
+                        ease: "linear",
+                      }}
+                    >
+                      <Navigation size={18} />
+                    </motion.div>
+                    Processing...
+                  </div>
+                ) : (
+                  "Place Order"
+                )}
+              </button>
 
-            <div className="mt-6 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>₹{subtotal}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span>Tax</span>
-                <span>₹{taxes.toFixed(0)}</span>
-              </div>
-
-              <div className="border-t pt-3 flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span className="text-[#C6A45C]">
-                  ₹{total.toFixed(0)}
-                </span>
-              </div>
+              {!selectedAddress && (
+                <p className="text-[10px] text-center text-red-400 font-bold uppercase tracking-wider mt-4">
+                  Please select a delivery address to proceed
+                </p>
+              )}
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

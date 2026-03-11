@@ -5,7 +5,9 @@ import {
   ROYAL_TIMELINE,
 } from "@/features/about/about.data";
 
-const AboutHeroSlider = lazy(() => import("@/components/sliders/AboutHeroSlider"));
+const AboutHeroSlider = lazy(
+  () => import("@/components/sliders/AboutHeroSlider"),
+);
 const AboutSections = lazy(() => import("@/features/about/AboutSections"));
 
 const PageLoader = () => (

@@ -42,10 +42,7 @@ export const verifyOtpApi = async (payload) => {
 
   const body = response.data;
 
-  const user =
-    body?.user ||
-    body?.data?.user ||
-    body?.data?.data?.user;
+  const user = body?.user || body?.data?.user || body?.data?.data?.user;
 
   const token =
     body?.token ||

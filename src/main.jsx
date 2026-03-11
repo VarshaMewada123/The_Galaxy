@@ -4,7 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
-import { queryClient } from "./app/queryClient"; // ✅ FIXED IMPORT
+import { queryClient } from "./app/queryClient";
 import { store, persistor } from "./store/store";
 import App from "./App";
 import "./index.css";
@@ -29,5 +29,5 @@ ReactDOM.createRoot(container).render(
         </PersistGate>
       </Provider>
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

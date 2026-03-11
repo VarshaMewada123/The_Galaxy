@@ -47,9 +47,7 @@ function HeroSlider() {
                   className="w-full h-full object-cover"
                   initial={reduceMotion ? false : { scale: 1.1 }}
                   animate={
-                    isActive && !reduceMotion
-                      ? { scale: 1 }
-                      : { scale: 1.1 }
+                    isActive && !reduceMotion ? { scale: 1 } : { scale: 1.1 }
                   }
                   transition={{ duration: 6, ease: "easeOut" }}
                 />
@@ -59,8 +57,6 @@ function HeroSlider() {
           </SwiperSlide>
         ))}
       </Swiper>
-
-      {/* Hero Content */}
       <div className="absolute inset-0 z-20 flex items-center justify-center text-center px-4">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}

@@ -1,8 +1,8 @@
 import HeroSection from "../features/home/HeroSection";
 import RoomSection from "../features/home/RoomSection";
 import DiningSection from "../features/home/DiningSection";
-import ExperienceSection from "../features/home/ExperienceSection";
 import TestimonialSection from "../features/home/TestimonialSection";
+import AmenitiesSection from "../features/home/AmenitiesSection";
 
 export default function HomePage() {
   return (
@@ -10,7 +10,7 @@ export default function HomePage() {
       <HeroSection />
       <RoomSection />
       <DiningSection />
-      {/* <ExperienceSection /> */}
+      <AmenitiesSection />
       <TestimonialSection />
     </main>
   );

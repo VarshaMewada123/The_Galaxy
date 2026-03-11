@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import axiosClient from "@/api/axiosClient";
 import { useState, useEffect, useCallback, memo } from "react";
 import {
   MapPin,
@@ -16,7 +17,7 @@ const XIcon = ({ size = 18 }) => (
   </svg>
 );
 
-const goldColor = "#C6A45C";
+const GOLD_COLOR = "#C6A45C";
 
 const Footer = memo(function Footer() {
   const navigate = useNavigate();
@@ -37,7 +38,14 @@ const Footer = memo(function Footer() {
   );
 
   useEffect(() => {
-    document.body.style.overflow = openNewsletter ? "hidden" : "";
+    if (openNewsletter) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [openNewsletter]);
 
   const handleChange = useCallback((e) => {
@@ -48,83 +56,102 @@ const Footer = memo(function Footer() {
     }));
   }, []);
 
-  const containerVars = prefersReducedMotion
-    ? {}
-    : {
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: { staggerChildren: 0.1 },
-        },
-      };
+  const containerVars = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: prefersReducedMotion ? 0 : 0.1,
+      },
+    },
+  };
 
-  const itemVars = prefersReducedMotion
-    ? {}
-    : {
-        hidden: { opacity: 0, y: 20 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          transition: { duration: 0.5, ease: "easeOut" },
-        },
-      };
+  const itemVars = {
+    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axiosClient.post("/newsletter/subscribe", {
+        email: formData.email,
+      });
+
+      alert(res.data.message);
+
+      setFormData({ email: "", agree: false });
+      setOpenNewsletter(false);
+    } catch (error) {
+      alert(error.message || "Subscription failed");
+    }
+  };
 
   return (
     <>
-      <footer className="bg-[#020617] text-slate-400 pt-16 sm:pt-24 pb-10 border-t border-white/5 overflow-x-hidden">
+      <footer className="relative w-full bg-[#020617] text-slate-400 pt-16 md:pt-24 pb-10 border-t border-white/5 overflow-hidden">
         <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-14"
+          className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.15 }}
+          viewport={{ once: true, amount: 0.1 }}
           variants={containerVars}
         >
           <motion.div
             variants={itemVars}
-            className="space-y-6 text-center sm:text-left"
+            className="flex flex-col items-center sm:items-start space-y-6"
           >
-            <h3 className="text-2xl sm:text-3xl font-serif text-white">
-              Hotel <span style={{ color: goldColor }}>The Galaxy</span>
+            <h3 className="text-2xl md:text-3xl font-serif text-white tracking-tight">
+              Hotel <span style={{ color: GOLD_COLOR }}>The Galaxy</span>
             </h3>
-
-            <p className="text-sm opacity-70 max-w-xs mx-auto sm:mx-0">
+            <p className="text-sm leading-relaxed opacity-70 max-w-xs text-center sm:text-left">
               Defining luxury through personalized service and exquisite
               surroundings in the heart of Chhindwara.
             </p>
-
-            <div className="flex justify-center sm:justify-start gap-4">
-              {[Facebook, Instagram].map((Icon, i) => (
+            <div className="flex gap-4">
+              {[
+                { Icon: Facebook, href: "#", label: "Facebook" },
+                { Icon: Instagram, href: "#", label: "Instagram" },
+              ].map((social, i) => (
                 <motion.a
                   key={i}
+                  href={social.href}
+                  aria-label={social.label}
                   whileHover={!prefersReducedMotion ? { y: -3 } : {}}
-                  className="p-2.5 border border-slate-800 rounded-full hover:text-[#C6A45C] transition-colors"
-                  href="#"
+                  className="p-3 border border-slate-800 rounded-full hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer"
                 >
-                  <Icon size={18} />
+                  <social.Icon size={18} />
                 </motion.a>
               ))}
-
               <motion.a
-                whileHover={!prefersReducedMotion ? { y: -3 } : {}}
-                className="p-2.5 border border-slate-800 rounded-full hover:text-[#C6A45C]"
                 href="#"
+                aria-label="X (formerly Twitter)"
+                whileHover={!prefersReducedMotion ? { y: -3 } : {}}
+                className="p-3 border border-slate-800 rounded-full hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer"
               >
                 <XIcon />
               </motion.a>
             </div>
           </motion.div>
 
-          <motion.div variants={itemVars}>
-            <h4 className="text-white text-xs uppercase tracking-[0.3em] mb-8 font-bold text-center sm:text-left">
+          <motion.div
+            variants={itemVars}
+            className="flex flex-col items-center sm:items-start"
+          >
+            <h4 className="text-white text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">
               Discover
             </h4>
-
             <ul className="space-y-4 text-sm text-center sm:text-left">
               {["Rooms", "Dining", "Banquet", "Contact"].map((link) => (
                 <li key={link}>
                   <Link
                     to={`/${link.toLowerCase()}`}
-                    className="hover:text-[#C6A45C] transition-colors"
+                    className="hover:text-[#C6A45C] transition-colors inline-block py-1 cursor-pointer"
                   >
                     {link}
                   </Link>
@@ -135,66 +162,86 @@ const Footer = memo(function Footer() {
 
           <motion.address
             variants={itemVars}
-            className="not-italic space-y-5 text-sm text-center sm:text-left"
+            className="not-italic flex flex-col items-center sm:items-start"
           >
-            <h4 className="text-white text-xs uppercase tracking-[0.3em] font-bold">
+            <h4 className="text-white text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">
               Contact Us
             </h4>
-
-            <p className="flex gap-3 justify-center sm:justify-start">
-              <MapPin size={20} style={{ color: goldColor }} />
-              PG College Road, Lalbagh, Chhindwara MP – 480001
-            </p>
-
-            <a
-              href="tel:+916262633305"
-              className="flex gap-3 justify-center sm:justify-start"
-            >
-              <Phone size={20} style={{ color: goldColor }} />
-              +91 62626 33305
-            </a>
-
-            <a
-              href="mailto:info@hotelgalaxy.in"
-              className="flex gap-3 justify-center sm:justify-start"
-            >
-              <Mail size={20} style={{ color: goldColor }} />
-              info@hotelgalaxy.in
-            </a>
+            <div className="space-y-5 text-sm">
+              <div className="flex items-start gap-4 justify-center sm:justify-start group">
+                <MapPin
+                  size={20}
+                  className="shrink-0 transition-transform group-hover:scale-110"
+                  style={{ color: GOLD_COLOR }}
+                />
+                <span className="leading-relaxed">
+                  PG College Road, Lalbagh,
+                  <br />
+                  Chhindwara MP – 480001
+                </span>
+              </div>
+              <a
+                href="tel:+916262633305"
+                className="flex items-center gap-4 justify-center sm:justify-start group hover:text-white transition-colors cursor-pointer"
+              >
+                <Phone
+                  size={20}
+                  className="shrink-0 transition-transform group-hover:scale-110"
+                  style={{ color: GOLD_COLOR }}
+                />
+                +91 62626 33305
+              </a>
+              <a
+                href="mailto:info@hotelgalaxy.in"
+                className="flex items-center gap-4 justify-center sm:justify-start group hover:text-white transition-colors cursor-pointer"
+              >
+                <Mail
+                  size={20}
+                  className="shrink-0 transition-transform group-hover:scale-110"
+                  style={{ color: GOLD_COLOR }}
+                />
+                info@hotelgalaxy.in
+              </a>
+            </div>
           </motion.address>
 
-          <motion.div variants={itemVars} className="text-center sm:text-left">
-            <h4 className="text-white text-xs uppercase tracking-[0.3em] mb-6 font-bold">
+          <motion.div
+            variants={itemVars}
+            className="flex flex-col items-center sm:items-start"
+          >
+            <h4 className="text-white text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">
               Newsletter
             </h4>
-
+            <p className="text-xs mb-6 opacity-60 text-center sm:text-left">
+              Join our mailing list for exclusive offers.
+            </p>
             <motion.button
-              whileHover={!prefersReducedMotion ? { scale: 1.02 } : {}}
-              whileTap={!prefersReducedMotion ? { scale: 0.98 } : {}}
+              whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
+              whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
               onClick={() => setOpenNewsletter(true)}
-              className="py-4 px-10 text-[10px] font-black tracking-widest text-slate-900 rounded-sm"
-              style={{ backgroundColor: goldColor }}
+              className="w-full sm:w-auto py-4 px-10 text-[10px] font-black tracking-[0.2em] text-slate-900 rounded-sm shadow-lg hover:brightness-110 transition-all cursor-pointer"
+              style={{ backgroundColor: GOLD_COLOR }}
             >
               SUBSCRIBE
             </motion.button>
           </motion.div>
         </motion.div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] tracking-[0.2em] text-center">
-          <p className="opacity-60">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 mt-20 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-8 text-[11px] tracking-[0.2em]">
+          <p className="font-medium text-#90A1B9">
             © {currentYear} HOTEL THE GALAXY. ALL RIGHTS RESERVED.
           </p>
 
           <div className="flex gap-8">
             <button
               onClick={() => goTo("/privacyy")}
-              className="hover:text-[#C6A45C]"
+              className="text-#90A1B9 hover:text-[#C6A45C] transition-colors uppercase cursor-pointer"
             >
               Privacy Policy
             </button>
             <button
               onClick={() => goTo("/terms-of-use")}
-              className="hover:text-[#C6A45C]"
+              className="text-#90A1B9 hover:text-[#C6A45C] transition-colors uppercase cursor-pointer"
             >
               Terms of Use
             </button>
@@ -205,7 +252,7 @@ const Footer = memo(function Footer() {
       <AnimatePresence>
         {openNewsletter && (
           <motion.div
-            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[999] flex justify-center items-center p-4"
+            className="fixed inset-0 bg-black/95 backdrop-blur-md z-[999] flex justify-center items-center p-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -213,41 +260,72 @@ const Footer = memo(function Footer() {
             <motion.div
               role="dialog"
               aria-modal="true"
-              className="bg-white max-w-lg w-full p-8 relative rounded-sm shadow-2xl"
-              initial={{ scale: 0.96, opacity: 0 }}
+              className="bg-white max-w-md w-full p-8 md:p-12 relative rounded-sm shadow-2xl"
+              initial={{ scale: prefersReducedMotion ? 1 : 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.96, opacity: 0 }}
+              exit={{ scale: prefersReducedMotion ? 1 : 0.9, opacity: 0 }}
             >
               <button
                 onClick={() => setOpenNewsletter(false)}
-                className="absolute right-4 top-4 text-slate-400 hover:text-black"
-                aria-label="Close"
+                className="absolute right-6 top-6 text-slate-400 hover:text-black transition-colors cursor-pointer"
+                aria-label="Close modal"
               >
                 <CloseIcon size={24} />
               </button>
 
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setOpenNewsletter(false);
-                }}
-                className="space-y-6"
-              >
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="Email Address"
-                  onChange={handleChange}
-                  className="w-full border-b border-slate-200 py-3 outline-none focus:border-[#C6A45C]"
-                />
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-serif mb-2 text-slate-900">
+                  Join the Club
+                </h2>
+                <p className="text-slate-500 text-sm">
+                  Experience luxury in your inbox.
+                </p>
+              </div>
+
+              <form onSubmit={handleSubscribe} className="space-y-6">
+                <div className="space-y-2">
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full border-b-2 border-slate-100 py-3 outline-none focus:border-[#C6A45C] transition-colors text-slate-800 bg-transparent"
+                  />
+                </div>
+
+                <label className="flex items-start gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    name="agree"
+                    required
+                    checked={formData.agree}
+                    onChange={handleChange}
+                    className="mt-1 accent-[#C6A45C] cursor-pointer"
+                  />
+                  <span className="text-[11px] leading-relaxed text-slate-500 group-hover:text-slate-700">
+                    I agree to receive marketing communications and acknowledge
+                    the privacy policy.
+                  </span>
+                </label>
 
                 <motion.button
                   type="submit"
                   disabled={!formData.agree}
-                  className="w-full py-4 text-[10px] font-black tracking-[0.2em] text-white"
+                  whileHover={
+                    formData.agree && !prefersReducedMotion
+                      ? { scale: 1.02 }
+                      : {}
+                  }
+                  whileTap={
+                    formData.agree && !prefersReducedMotion
+                      ? { scale: 0.98 }
+                      : {}
+                  }
+                  className="w-full py-4 text-[10px] font-black tracking-[0.2em] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
                   style={{
-                    backgroundColor: formData.agree ? goldColor : "#e2e8f0",
+                    backgroundColor: formData.agree ? GOLD_COLOR : "#cbd5e1",
                   }}
                 >
                   SUBMIT

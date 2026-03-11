@@ -85,7 +85,6 @@ export default function useLogin() {
     formData,
 
     setShowPassword,
-
     handleMethodChange,
     handleIdentifierChange,
     handlePasswordChange,

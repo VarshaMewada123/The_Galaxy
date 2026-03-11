@@ -1,112 +1,7 @@
-import { motion } from "framer-motion";
+import React from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
-const TermsOfUse = () => {
-  const containerVars = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-    },
-  };
-
-  const itemVars = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
-
-  return (
-    <div className="bg-white text-stone-800 min-h-screen pt-32 pb-20 px-6 sm:px-10">
-      <motion.div
-        className="max-w-4xl mx-auto"
-        initial="hidden"
-        animate="visible"
-        variants={containerVars}
-      >
-        <motion.div
-          variants={itemVars}
-          className="border-b border-stone-200 pb-10 mb-12"
-        >
-          <h1 className="text-4xl md:text-5xl font-serif text-stone-900 mb-4 tracking-tight">
-            General <span style={{ color: "#C6A45C" }}>Terms & Conditions</span>
-          </h1>
-          <p className="text-sm uppercase tracking-[0.2em] text-stone-500 font-medium">
-            Last Updated:{" "}
-            {new Date().toLocaleDateString("en-IN", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-        </motion.div>
-
-        <div className="space-y-12">
-          {sections.map((section, index) => (
-            <motion.section key={index} variants={itemVars} className="group">
-              <div className="flex items-baseline gap-4 mb-4">
-                <span
-                  className="text-xs font-bold tracking-widest"
-                  style={{ color: "#C6A45C" }}
-                >
-                  0{index + 1}
-                </span>
-                <h2 className="text-xl md:text-2xl text-stone-900 font-semibold tracking-wide">
-                  {section.title.split(". ")[1] || section.title}
-                </h2>
-              </div>
-
-              <div className="pl-0 md:pl-8 border-l-0 md:border-l border-stone-100 group-hover:border-[#C6A45C] transition-colors duration-500">
-                {section.content.map((para, i) => (
-                  <p
-                    key={i}
-                    className="mb-4 leading-relaxed text-stone-600 text-[15px] md:text-[16px] max-w-3xl"
-                  >
-                    {para}
-                  </p>
-                ))}
-              </div>
-            </motion.section>
-          ))}
-        </div>
-
-        <motion.div
-          variants={itemVars}
-          className="mt-20 p-8 md:p-12 text-center border"
-          style={{ borderColor: "#C6A45C40", backgroundColor: "#fcfbf7" }}
-        >
-          <h3 className="text-2xl font-serif mb-4 text-stone-900">
-            Need Clarification?
-          </h3>
-          <p className="text-stone-600 mb-6">
-            Our concierge team is available 24/7 to assist with your queries.
-          </p>
-          <div className="flex flex-col md:flex-row justify-center gap-6 text-sm font-medium tracking-wide">
-            <a
-              href="mailto:info@thegalaxyhotel.com"
-              className="hover:text-[#C6A45C] transition-colors"
-            >
-              info@hotelthegalaxy.com
-            </a>
-            <span className="hidden md:block text-stone-300">|</span>
-            <a
-              href="tel:+916262633305"
-              className="hover:text-[#C6A45C] transition-colors"
-            >
-              +91 6262633305
-            </a>
-          </div>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-};
-
-export default TermsOfUse;
-
-const sections = [
+const SECTIONS = [
   {
     title: "1. Introduction to the Site",
     content: [
@@ -177,3 +72,128 @@ const sections = [
     ],
   },
 ];
+
+const TermsOfUse = () => {
+  const shouldReduceMotion = useReducedMotion();
+
+  const containerVars = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVars = {
+    hidden: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : 15,
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.215, 0.61, 0.355, 1] },
+    },
+  };
+
+  const lastUpdated = new Date().toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  return (
+    <main className="min-h-screen bg-white text-stone-800 selection:bg-stone-200">
+      <div className="mx-auto max-w-5xl px-5 py-24 sm:px-10 lg:py-32">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={containerVars}
+          className="w-full"
+        >
+          <motion.header
+            variants={itemVars}
+            className="mb-16 border-b border-stone-200 pb-12"
+          >
+            <h1 className="mb-6 font-serif text-4xl font-light leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
+              General <span className="text-[#B5924B]">Terms & Conditions</span>
+            </h1>
+            <div className="flex items-center gap-3">
+              <span className="h-px w-8 bg-[#B5924B]/40" />
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
+                Last Updated: {lastUpdated}
+              </p>
+            </div>
+          </motion.header>
+
+          <div className="grid gap-16 lg:gap-20">
+            {SECTIONS.map((section, index) => (
+              <motion.section
+                key={index}
+                variants={itemVars}
+                className="group flex flex-col gap-4 md:flex-row md:gap-8"
+              >
+                <div className="flex-shrink-0 pt-1">
+                  <span className="font-serif text-sm font-bold tracking-tighter text-[#B5924B] opacity-60">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                </div>
+
+                <div className="relative flex-1 border-stone-100 transition-colors duration-500 group-hover:border-[#B5924B] md:border-l md:pl-8">
+                  <h2 className="mb-6 text-xl font-semibold tracking-tight text-stone-900 sm:text-2xl">
+                    {section.title.includes(". ")
+                      ? section.title.split(". ")[1]
+                      : section.title}
+                  </h2>
+                  <div className="space-y-5">
+                    {section.content.map((para, i) => (
+                      <p
+                        key={i}
+                        className="max-w-prose text-[16px] leading-relaxed text-stone-600 sm:text-lg"
+                      >
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </motion.section>
+            ))}
+          </div>
+
+          <motion.footer
+            variants={itemVars}
+            className="mt-24 border border-[#C6A45C40] bg-[#fcfbf7] p-8 text-center sm:p-16"
+          >
+            <h3 className="mb-4 font-serif text-2xl text-stone-900 sm:text-3xl">
+              Need Clarification?
+            </h3>
+            <p className="mx-auto mb-10 max-w-md text-stone-600">
+              Our concierge team is available around the clock to assist with
+              your specific requirements.
+            </p>
+            <div className="flex flex-col items-center justify-center gap-6 text-sm font-medium tracking-widest sm:flex-row">
+              <a
+                href="mailto:info@hotelthegalaxy.com"
+                className="border-b border-transparent pb-1 transition-all hover:border-[#C6A45C] hover:text-[#C6A45C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A45C] focus-visible:ring-offset-2"
+              >
+                INFO@HOTELTHEGALAXY.COM
+              </a>
+              <span className="hidden h-4 w-px bg-stone-300 sm:block" />
+              <a
+                href="tel:+916262633305"
+                className="border-b border-transparent pb-1 transition-all hover:border-[#C6A45C] hover:text-[#C6A45C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A45C] focus-visible:ring-offset-2"
+              >
+                +91 6262633305
+              </a>
+            </div>
+          </motion.footer>
+        </motion.div>
+      </div>
+    </main>
+  );
+};
+
+export default TermsOfUse;

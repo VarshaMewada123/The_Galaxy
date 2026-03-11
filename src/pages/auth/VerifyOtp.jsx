@@ -5,6 +5,8 @@ import { verifyOtpApi } from "../../api/auth.api";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authSlice";
 import { ShieldCheck, ArrowRight, RefreshCcw } from "lucide-react";
+import { isValidOtp } from "../../utils/validators";
+import { useAuthStore } from "../../store/auth.store";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
@@ -14,7 +16,7 @@ export default function VerifyOtp() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const { setAuth } = useAuthStore.getState();
   const phone = state?.phone || "";
 
   const fadeInUp = {
@@ -26,7 +28,7 @@ export default function VerifyOtp() {
   const handleVerify = async (e) => {
     e?.preventDefault();
 
-    if (otp.length < 4) {
+    if (!isValidOtp(otp)) {
       setError("Please enter the full verification code");
       return;
     }
@@ -46,6 +48,14 @@ export default function VerifyOtp() {
         otp,
       });
 
+      localStorage.setItem("accessToken", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
+
+      setAuth({
+        user: res.user,
+        accessToken: res.token,
+      });
+
       dispatch(
         loginSuccess({
           user: res.user,
@@ -53,8 +63,8 @@ export default function VerifyOtp() {
         }),
       );
 
-      const redirectPath = state?.redirect || "/";
-
+      const redirectPath = state?.redirectPath || "/";
+      console.log("$$$redirect path", redirectPath);
       navigate(redirectPath, {
         replace: true,
         state: {
@@ -69,7 +79,6 @@ export default function VerifyOtp() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] px-4">
       <div className="absolute top-0 left-0 w-full h-1.5 bg-[#C6A45C]" />

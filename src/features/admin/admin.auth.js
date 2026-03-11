@@ -4,12 +4,8 @@ const ACCESS_KEY = "adminAccessToken";
 const REFRESH_KEY = "adminRefreshToken";
 const USER_KEY = "adminUser";
 
-
 export const adminLogin = async (credentials) => {
-  const res = await axiosClient.post(
-    "/v1/admin/login",
-    credentials
-  );
+  const res = await axiosClient.post("/v1/admin/login", credentials);
 
   const { tokens, admin } = res.data;
 
@@ -20,17 +16,11 @@ export const adminLogin = async (credentials) => {
   };
 };
 
-
-export const saveAdminSession = ({
-  accessToken,
-  refreshToken,
-  user,
-}) => {
+export const saveAdminSession = ({ accessToken, refreshToken, user }) => {
   localStorage.setItem(ACCESS_KEY, accessToken);
   localStorage.setItem(REFRESH_KEY, refreshToken);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 };
-
 
 export const getAdminSession = () => {
   try {
@@ -47,7 +37,6 @@ export const getAdminSession = () => {
     return null;
   }
 };
-
 
 export const clearAdminSession = () => {
   localStorage.removeItem(ACCESS_KEY);
