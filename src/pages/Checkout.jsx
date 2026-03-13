@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState, useMemo } from "react";
 import { useCartStore } from "@/store/cart.store";
 import { useCheckoutStore } from "@/store/checkout.store";
@@ -17,7 +18,7 @@ import {
   Trash2,
   Edit2,
 } from "lucide-react";
-import { City } from "country-state-city";
+// import { City } from "country-state-city";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function Checkout() {
   const { user, accessToken } = useSelector((state) => state.auth);
   const { address, setAddressField, clearAddress } = useCheckoutStore();
 
-  const [cities] = useState(() => City.getCitiesOfCountry("IN"));
+  // const [cities] = useState(() => City.getCitiesOfCountry("IN"));
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -35,7 +36,6 @@ export default function Checkout() {
   const [addressTag, setAddressTag] = useState("Home");
 
   const items = useMemo(() => cart?.items || [], [cart]);
-
   useEffect(() => {
     if (!accessToken) {
       navigate("/login", {
@@ -65,15 +65,22 @@ export default function Checkout() {
   const taxes = subtotal * 0.05;
   const total = subtotal + taxes;
 
+  // const isAddressValid = useMemo(() => {
+  //   const pinRegex = /^[1-9][0-9]{5}$/;
+  //   return (
+  //     address.street?.trim().length >= 3 &&
+  //     address.landmark?.trim().length >= 3 &&
+  //     address.city?.trim().length >= 2 &&
+  //     pinRegex.test(address.pincode)
+  //   );
+  // }, [address]);
+
   const isAddressValid = useMemo(() => {
-    const pinRegex = /^[1-9][0-9]{5}$/;
-    return (
-      address.street?.trim().length >= 3 &&
-      address.landmark?.trim().length >= 3 &&
-      address.city?.trim().length >= 2 &&
-      pinRegex.test(address.pincode)
-    );
-  }, [address]);
+  return (
+    address.street?.trim().length >= 3 &&
+    address.landmark?.trim().length >= 3
+  );
+}, [address]);
 
   const handleAddNewAddress = async () => {
     if (!isAddressValid) return;
@@ -108,27 +115,36 @@ export default function Checkout() {
     }
   };
 
-  const handleEditAddress = (addr) => {
-    setEditingId(addr._id);
-    setAddressField("street", addr.street);
-    setAddressField("landmark", addr.landmark);
-    setAddressField("city", addr.city);
-    setAddressField("pincode", addr.pincode);
-    setAddressTag(addr.label);
-    setShowForm(true);
-  };
+  // const handleEditAddress = (addr) => {
+  //   setEditingId(addr._id);
+  //   setAddressField("street", addr.street);
+  //   setAddressField("landmark", addr.landmark);
+  //   setAddressField("city", addr.city);
+  //   setAddressField("pincode", addr.pincode);
+  //   setAddressTag(addr.label);
+  //   setShowForm(true);
+  // };
 
+
+  const handleEditAddress = (addr) => {
+  setEditingId(addr._id);
+  setAddressField("street", addr.street);
+  setAddressField("landmark", addr.landmark);
+  setAddressTag(addr.label);
+  setShowForm(true);
+};
   const handleOrder = async () => {
     if (!selectedAddress || loading) return;
 
     setLoading(true);
 
     try {
+      console.log("$$$ items", items)
       const payload = {
         items: items.map((i) => {
-          if (i.type === "combo") {
+          if (i.combo) {
             return {
-              combo: i.comboId || i._id,
+              combo: i.dishId || i._id,
               quantity: i.quantity,
             };
           }
@@ -140,7 +156,7 @@ export default function Checkout() {
         }),
         address: selectedAddress,
       };
-
+      console.log("$$$ payload",payload);
       const res = await axiosClient.post("/orders", payload);
 
       const order = res.data.data;
@@ -268,8 +284,9 @@ export default function Checkout() {
                         {addr.label}
                       </p>
                       <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-                        {addr.street}, {addr.landmark}, {addr.city} -{" "}
-                        {addr.pincode}
+                        {/* {addr.street}, {addr.landmark}, {addr.city} -{" "}
+                        {addr.pincode} */}
+                        {addr.street}, {addr.landmark}
                       </p>
                     </div>
                   </div>
@@ -381,7 +398,7 @@ export default function Checkout() {
                         }
                       />
                     </div>
-                    <div className="space-y-1.5">
+                    {/* <div className="space-y-1.5">
                       <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
                         City
                       </label>
@@ -403,12 +420,12 @@ export default function Checkout() {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
+                      {/* <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
                         Pincode (6 Digits)
-                      </label>
-                      <input
+                      </label> */}
+                      {/* <input
                         required
                         name="pincode"
                         type="text"
@@ -423,7 +440,7 @@ export default function Checkout() {
                             e.target.value.replace(/\D/g, ""),
                           )
                         }
-                      />
+                      /> */}
                     </div>
                   </div>
 

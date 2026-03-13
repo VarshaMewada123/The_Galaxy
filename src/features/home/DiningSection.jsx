@@ -1,11 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export default function DiningSection() {
   return (
-    <section className="py-24 bg-[#fafaf9] overflow-hidden border-t border-gray-100">
+    <section className="py-24 bg-[#FAF9F6] overflow-hidden border-t border-gray-100">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-16 items-center lg:mx-30">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}

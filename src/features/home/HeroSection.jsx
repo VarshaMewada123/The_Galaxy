@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { motion, useReducedMotion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectFade, Autoplay, Pagination } from "swiper/modules";

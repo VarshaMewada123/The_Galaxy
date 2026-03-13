@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
 import DiningSections from "../features/dining/DiningSections";
 import FloatingCartBar from "@/components/cart/FloatingCartBar";

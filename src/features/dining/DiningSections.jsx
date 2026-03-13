@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -5,11 +6,13 @@ import {
   UtensilsCrossed,
   ChevronLeft,
   ChevronRight,
+  Search,
 } from "lucide-react";
 import axiosClient from "../../api/axiosClient";
 import DishCard from "../../components/cards/DishCard";
 import DiningVenueCard from "../../components/cards/DiningVenueCard";
 import { diningVenues } from "./dining.data";
+import jainFood from "@/assets/Jain.webp";
 
 const containerVars = {
   hidden: { opacity: 0 },
@@ -35,38 +38,120 @@ export default function DiningSections() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [loading, setLoading] = useState(true);
   const [combos, setCombos] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
 
+ 
   const fetchData = async () => {
     setLoading(true);
+
     try {
       const [menuRes, catRes, comboRes] = await Promise.all([
         axiosClient.get("/menu"),
         axiosClient.get("/categories"),
-        axiosClient.get("/admin/dining/combos"),
+       axiosClient.get("/dining/combos"),
       ]);
 
-      setMenuItems(menuRes.data.data || []);
-      setCategories(catRes.data.data || []);
-      setCombos(comboRes.data.data || comboRes.data || []);
+      const menuData = menuRes.data.data || [];
+      const catData = catRes.data.data || [];
+
+      setMenuItems(menuData);
+ 
+      const hasJainItems = menuData.some((item) => item.isJain === true);
+
+      if (hasJainItems) {
+        catData.unshift({
+          _id: "jain-category",
+          name: "Jain",
+          image: {
+            url:jainFood, 
+          },
+          isVirtual: true,
+        });
+      }
+
+      setCategories(catData);
+
+      setCombos(comboRes?.data?.data || []);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     fetchData();
   }, []);
+  // const filteredItems = useMemo(() => {
+  //   let items = menuItems;
+
+  //   if (activeCategory.toLowerCase() === "jain") {
+  //     items = items.filter((item) => item.isJain === true);
+  //   } else if (activeCategory !== "All") {
+  //     items = items.filter((item) => item.category?.name === activeCategory);
+  //   }
+
+  //   if (searchQuery.trim().length >= 3) {
+  //     const query = searchQuery.toLowerCase();
+  //     if (query === "jain") {
+  //       console.log("$$items", items)
+  //       items = items.filter((item) => item.isJain);
+  //       console.log("$$$ item  f", items)
+  //     } else {
+  //       items = items.filter(
+  //         (item) =>
+  //           item.name?.toLowerCase().includes(query) ||
+  //           item.category?.name?.toLowerCase().includes(query),
+  //       );
+  //     }
+  //   }
+
+  //   return items;
+  // }, [menuItems, activeCategory, searchQuery]);
 
   const filteredItems = useMemo(() => {
-    return activeCategory === "All"
-      ? menuItems
-      : menuItems.filter((item) => item.category?.name === activeCategory);
-  }, [menuItems, activeCategory]);
+  const query = searchQuery.trim().toLowerCase();
+  let items = [...menuItems];
 
+  console.log("All Menu Items:", items);
+  console.log("Search Query:", query);
+  console.log("Active Category:", activeCategory);
+
+  if (query.length > 0) {
+    const regex = new RegExp(query, "i");
+
+    items = items.filter((item) => {
+      const nameMatch = regex.test(item.name || "");
+      const categoryMatch = regex.test(item.category?.name || "");
+      const jainMatch = query.includes("jain") && item.isJain === true;
+
+      console.log("Checking Item:", item.name);
+      console.log("Name Match:", nameMatch);
+      console.log("Category Match:", categoryMatch);
+      console.log("Jain Match:", jainMatch);
+
+      return nameMatch || categoryMatch || jainMatch;
+    });
+
+    console.log("Filtered Items After Search:", items);
+    return items;
+  }
+
+  if (activeCategory?.toLowerCase() === "jain") {
+    items = items.filter((item) => item.isJain === true);
+    console.log("Filtered Jain Category Items:", items);
+  } else if (activeCategory !== "All") {
+    items = items.filter(
+      (item) =>
+        item.category?.name?.toLowerCase() === activeCategory.toLowerCase()
+    );
+    console.log("Filtered Category Items:", items);
+  }
+
+  console.log("Final Filtered Items:", items);
+  return items;
+}, [menuItems, activeCategory, searchQuery]);
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { clientWidth } = scrollRef.current;
@@ -94,17 +179,31 @@ export default function DiningSections() {
               <button
                 onClick={() => scroll("left")}
                 className="p-3 border border-gray-200 rounded-full hover:bg-black hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-30"
-                aria-label="Scroll left"
               >
                 <ChevronLeft size={24} />
               </button>
               <button
                 onClick={() => scroll("right")}
                 className="p-3 border border-gray-200 rounded-full hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
-                aria-label="Scroll right"
               >
                 <ChevronRight size={24} />
               </button>
+            </div>
+          </div>
+
+          <div className="flex justify-center mb-10">
+            <div className="relative w-full max-w-xl">
+              <Search
+                className="absolute left-4 top-3.5 text-gray-400"
+                size={18}
+              />
+              <input
+                type="text"
+                placeholder="Search dishes or categories..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-5 py-3 border border-gray-200 rounded-full outline-none focus:ring-2 focus:ring-[#C6A45C]"
+              />
             </div>
           </div>
 
@@ -151,8 +250,11 @@ export default function DiningSections() {
           ) : (
             <AnimatePresence mode="wait">
               {filteredItems.length > 0 ? (
+                // <motion.div
+                //   key={activeCategory}
                 <motion.div
-                  key={activeCategory}
+  key={activeCategory + searchQuery}
+
                   variants={containerVars}
                   initial={shouldReduceMotion ? "visible" : "hidden"}
                   animate="visible"
@@ -181,7 +283,7 @@ export default function DiningSections() {
                     size={80}
                   />
                   <p className="text-gray-400 font-serif text-lg italic">
-                    No items found in this category.
+                    No items found.
                   </p>
                 </motion.div>
               )}
@@ -256,38 +358,39 @@ function CategoryCircle({ name, image, isActive, onClick }) {
     >
       <div className="relative p-2 flex items-center justify-center">
         <div
-          className={`absolute inset-0 rounded-full border-2 border-[#C6A45C] transition-all duration-500
-          ${isActive ? "scale-100 opacity-100" : "scale-75 opacity-0 group-hover:scale-90 group-hover:opacity-30"}`}
+          className={`absolute inset-0 rounded-full border-2 border-[#C6A45C] transition-all duration-500 ${
+            isActive
+              ? "scale-100 opacity-100"
+              : "scale-75 opacity-0 group-hover:scale-90 group-hover:opacity-30"
+          }`}
         />
 
         <motion.div
           whileTap={{ scale: 0.95 }}
-          className={`relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-gray-50 transition-all duration-300 z-10
-          ${isActive ? "shadow-xl" : "shadow-sm group-hover:shadow-lg"}`}
+          className={`relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-full overflow-hidden bg-gray-50 transition-all duration-300 z-10 ${
+            isActive ? "shadow-xl" : "shadow-sm group-hover:shadow-lg"
+          }`}
         >
           {image ? (
             <img
               src={image}
               alt={name}
-              className={`w-full h-full object-cover transition-transform duration-700 ease-out
-              ${isActive ? "scale-110" : "scale-100 group-hover:scale-110"}`}
-              loading="lazy"
+              className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
+                isActive ? "scale-110" : "scale-100 group-hover:scale-110"
+              }`}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-[#C6A45C] font-serif text-2xl">
               {name[0]}
             </div>
           )}
-          <div
-            className={`absolute inset-0 bg-black/5 opacity-0 transition-opacity ${!isActive && "group-hover:opacity-100"}`}
-          />
         </motion.div>
       </div>
 
       <span
-        className={`text-[10px] md:text-xs lg:text-sm font-bold tracking-[0.15em] transition-colors duration-300 uppercase mt-4
-        ${isActive ? "text-[#C6A45C]" : "text-gray-500 group-hover:text-black"}
-        `}
+        className={`text-[10px] md:text-xs lg:text-sm font-bold tracking-[0.15em] uppercase mt-4 ${
+          isActive ? "text-[#C6A45C]" : "text-gray-500 group-hover:text-black"
+        }`}
       >
         {name}
       </span>

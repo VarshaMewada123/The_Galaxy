@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { motion, useReducedMotion } from "framer-motion";
 import { Star, Plus } from "lucide-react";
 import { useCartStore } from "@/store/cart.store";
@@ -10,7 +11,12 @@ export default function DishCard({ dish, index }) {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    addItem(dish);
+    console.log("$$$ dish", dish);
+    const payload = dish.isCombo
+      ? { ...dish, combo: dish._id }
+      : { ...dish, menuItems: dish._id };
+    // console.log("$$$ payload", payload);
+    addItem(payload);
     if (quantity !== null && quantity > 0) {
       setQuantity((q) => q - 1);
     }

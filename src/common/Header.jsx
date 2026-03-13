@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback, memo, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { DoorOpenIcon, Menu, User, X, ChevronDown, Bell } from "lucide-react";

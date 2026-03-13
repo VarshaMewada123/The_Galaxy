@@ -33,6 +33,7 @@ export const useCartStore = create((set, get) => ({
         price: item.basePrice,
         image: item.images?.[0]?.url,
         quantity: 1,
+        combo : item.isCombo ? true : false
       });
 
       console.log("➕ New Item Added");

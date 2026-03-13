@@ -17,7 +17,7 @@ export default function RoomsPage() {
       : roomsData.filter((room) => room.category === filter);
 
   return (
-    <main className="min-h-screen bg-[#F5F5F0]">
+    <main className="min-h-screen bg-[#FAF9F6]">
       <RoomsHero />
 
       <section className="sticky top-0 z-50 bg-[#F5F5F0]/80 backdrop-blur border-b border-[#D4AF37]/20 py-6">
