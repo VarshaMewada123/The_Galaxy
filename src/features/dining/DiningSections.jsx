@@ -83,32 +83,6 @@ export default function DiningSections() {
   useEffect(() => {
     fetchData();
   }, []);
-  // const filteredItems = useMemo(() => {
-  //   let items = menuItems;
-
-  //   if (activeCategory.toLowerCase() === "jain") {
-  //     items = items.filter((item) => item.isJain === true);
-  //   } else if (activeCategory !== "All") {
-  //     items = items.filter((item) => item.category?.name === activeCategory);
-  //   }
-
-  //   if (searchQuery.trim().length >= 3) {
-  //     const query = searchQuery.toLowerCase();
-  //     if (query === "jain") {
-  //       console.log("$$items", items)
-  //       items = items.filter((item) => item.isJain);
-  //       console.log("$$$ item  f", items)
-  //     } else {
-  //       items = items.filter(
-  //         (item) =>
-  //           item.name?.toLowerCase().includes(query) ||
-  //           item.category?.name?.toLowerCase().includes(query),
-  //       );
-  //     }
-  //   }
-
-  //   return items;
-  // }, [menuItems, activeCategory, searchQuery]);
 
   const filteredItems = useMemo(() => {
   const query = searchQuery.trim().toLowerCase();
