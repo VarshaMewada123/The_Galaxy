@@ -1,25 +1,31 @@
 import { create } from "zustand";
-export const useAuthStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem("user")) || null,
-  accessToken: localStorage.getItem("accessToken") || null,
+import { persist } from "zustand/middleware";
 
-  setAuth: ({ user, accessToken }) => {
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    set({
-      user,
-      accessToken,
-    });
-  },
-
-  logout: () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-
-    set({
+export const useAuthStore = create(
+  persist(
+    (set) => ({
       user: null,
       accessToken: null,
-    });
-  },
-}));
+
+      setAuth: ({ user, accessToken }) =>
+        set({
+          user,
+          accessToken,
+        }),
+
+      updateUser: (user) =>
+        set((state) => ({
+          user: { ...state.user, ...user },
+        })),
+
+      logout: () =>
+        set({
+          user: null,
+          accessToken: null,
+        }),
+    }),
+    {
+      name: "auth-storage",
+    },
+  ),
+);

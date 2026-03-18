@@ -11,7 +11,7 @@ export const useCartStore = create((set, get) => ({
   addItem: (item) => {
     const cart = { ...get().cart };
 
-    const existing = cart.items.find(i => i.dishId === item._id);
+    const existing = cart.items.find((i) => i.dishId === item._id);
 
     if (existing) {
       existing.quantity += 1;
@@ -21,7 +21,7 @@ export const useCartStore = create((set, get) => ({
         name: item.name,
         price: item.basePrice,
         image: item.images?.[0]?.url,
-        quantity: 1
+        quantity: 1,
       });
     }
 
@@ -31,7 +31,7 @@ export const useCartStore = create((set, get) => ({
 
   removeItem: (dishId) => {
     const cart = {
-      items: get().cart.items.filter(i => i.dishId !== dishId)
+      items: get().cart.items.filter((i) => i.dishId !== dishId),
     };
 
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -41,5 +41,5 @@ export const useCartStore = create((set, get) => ({
   clearCart: () => {
     localStorage.removeItem("cart");
     set({ cart: { items: [] } });
-  }
+  },
 }));

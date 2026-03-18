@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuthStore } from "../store/auth.store";
 import axiosClient from "../api/axiosClient";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Package,
   MapPin,
@@ -13,13 +14,21 @@ import {
   RotateCcw,
   XCircle,
   Plus,
+  Ban,
+  LogOut,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function Profile() {
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const updateUser = useAuthStore((s) => s.updateUser);
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const [searchParams] = useSearchParams();
 
@@ -31,6 +40,15 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
+
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [supportMessage, setSupportMessage] = useState(""); // <-- Added missing state
+
+  const [profileForm, setProfileForm] = useState({
+    fullName: user?.fullName || "",
+    phone: user?.phone || "",
+  });
 
   const [form, setForm] = useState({
     street: "",
@@ -169,6 +187,48 @@ export default function Profile() {
     }
   };
 
+  const updateProfile = async () => {
+    const load = toast.loading("Updating profile...");
+
+    try {
+      const res = await axiosClient.patch("/auth/updateprofile", {
+        fullName: profileForm.fullName,
+      });
+
+      if (res?.data?.success) {
+        updateUser(res.data.user);
+
+        toast.success("Profile updated", { id: load });
+
+        setShowEditProfile(false);
+      } else {
+        console.log("$$$", res.data.message);
+        toast.error(res?.data?.message || "Failed to update", { id: load });
+      }
+    } catch (err) {
+      console.error("Update profile error:", err);
+
+      toast.error(err?.response?.data?.message || "Failed to update", {
+        id: load,
+      });
+    }
+  };
+
+  const sendSupport = async () => {
+    const load = toast.loading("Sending request...");
+
+    try {
+      await axiosClient.post("/support", { message: supportMessage });
+
+      toast.success("Support request sent", { id: load });
+
+      setSupportMessage("");
+      setShowSupport(false);
+    } catch {
+      toast.error("Failed to send", { id: load });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F9F7F2] pt-18 pb-12 px-4 sm:px-6 lg:px-8 font-sans antialiased text-slate-900">
       <Toaster position="top-right" />
@@ -290,7 +350,7 @@ export default function Profile() {
                       <div className="p-4 bg-white border-t border-slate-50 flex flex-wrap gap-3">
                         <button
                           onClick={() => navigate(`/track-order/${order._id}`)}
-                          className="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2.5 bg-[#C6A45C] text-white rounded-xl text-sm font-bold hover:bg-[#C6A45C]  transition-colors cursor-pointer "
+                          className="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2.5 bg-[#C6A45C] text-white rounded-xl text-sm font-bold hover:bg-[#C5A059] transition-colors cursor-pointer"
                         >
                           <Truck size={16} /> Track
                         </button>
@@ -581,6 +641,7 @@ export default function Profile() {
                   <h2 className="text-2xl font-black text-slate-800">
                     Account Settings
                   </h2>
+
                   <p className="text-slate-400 text-sm">
                     Manage your profile and preferences
                   </p>
@@ -602,38 +663,58 @@ export default function Profile() {
                   </div>
 
                   <button
-                    onClick={() => navigate("/edit-profile")}
-                    className="text-sm font-bold text-[#C5A059] hover:underline"
+                    onClick={() => setShowEditProfile(!showEditProfile)}
+                    className="text-sm font-bold text-[#C5A059]  cursor-pointer"
                   >
                     Edit
                   </button>
                 </div>
 
-                <div className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                      🔔
-                    </div>
+                <AnimatePresence>
+                  {showEditProfile && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-4">
+                        <input
+                          value={profileForm.fullName}
+                          onChange={(e) =>
+                            setProfileForm({
+                              ...profileForm,
+                              fullName: e.target.value,
+                            })
+                          }
+                          className="w-full border border-slate-200 p-3 rounded-xl"
+                        />
 
-                    <div>
-                      <h4 className="font-bold text-slate-800">
-                        Notifications
-                      </h4>
+                        <div className="relative">
+                          <input
+                            value={profileForm.phone}
+                            disabled
+                            className="w-full border border-slate-200 p-3 rounded-xl bg-slate-100 text-slate-500 pr-10 cursor-not-allowed"
+                          />
 
-                      <p className="text-sm text-slate-400">
-                        Receive updates about your orders
-                      </p>
-                    </div>
-                  </div>
+                          <Ban
+                            size={16}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500"
+                          />
+                        </div>
 
-                  <input
-                    type="checkbox"
-                    className="w-5 h-5 accent-[#C5A059]"
-                    defaultChecked
-                  />
-                </div>
+                        <button
+                          onClick={updateProfile}
+                          className="bg-[#C6A45C] text-white px-6 py-2 rounded-xl font-bold cursor-pointer"
+                        >
+                          Update Profile
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                <div className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center justify-between">
+                {/* <div className="bg-white border border-slate-100 rounded-2xl p-6 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
                       ❓
@@ -651,37 +732,144 @@ export default function Profile() {
                   </div>
 
                   <button
-                    onClick={() => navigate("/support")}
-                    className="text-sm font-bold text-[#C5A059] hover:underline"
+                    onClick={() => setShowSupport(!showSupport)}
+                    className="text-sm font-bold text-[#C5A059] cursor-pointer"
                   >
                     Open
                   </button>
-                </div>
+                </div> */}
+                <div className="bg-white border border-slate-100 rounded-2xl p-6 space-y-6">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-[#C5A059]/10 flex items-center justify-center text-[#C5A059] text-xl">
+                        ❓
+                      </div>
 
-                <div className="bg-white border border-red-100 rounded-2xl p-6 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
-                      <XCircle className="text-red-400" size={22} />
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-lg">
+                          Help & Support
+                        </h4>
+
+                        <p className="text-sm text-slate-400">
+                          We're here to help you anytime
+                        </p>
+                      </div>
                     </div>
 
-                    <div>
-                      <h4 className="font-bold text-red-500">Logout</h4>
-
-                      <p className="text-sm text-slate-400">
-                        Sign out from your account
-                      </p>
-                    </div>
+                    <button
+                      onClick={() => setShowSupport(!showSupport)}
+                      className="px-4 py-2 rounded-lg bg-[#C5A059] text-white text-sm font-bold hover:bg-[#b8934e] transition"
+                    >
+                      Contact
+                    </button>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      useAuthStore.getState().logout();
-                      navigate("/");
-                    }}
-                    className="text-sm font-bold text-red-500 hover:underline"
-                  >
-                    Logout
-                  </button>
+                  {/* Quick Help Options */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border hover:border-[#C5A059] hover:bg-[#C5A059]/5 transition">
+                      📦
+                      <span className="text-xs font-semibold text-slate-600">
+                        Order Issues
+                      </span>
+                    </button>
+
+                    <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border hover:border-[#C5A059] hover:bg-[#C5A059]/5 transition">
+                      💳
+                      <span className="text-xs font-semibold text-slate-600">
+                        Payment Help
+                      </span>
+                    </button>
+
+                    <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border hover:border-[#C5A059] hover:bg-[#C5A059]/5 transition">
+                      🔁
+                      <span className="text-xs font-semibold text-slate-600">
+                        Refund Status
+                      </span>
+                    </button>
+
+                    <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border hover:border-[#C5A059] hover:bg-[#C5A059]/5 transition">
+                      📍
+                      <span className="text-xs font-semibold text-slate-600">
+                        Address Help
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Support Form */}
+                  <AnimatePresence>
+                    {showSupport && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+                          <textarea
+                            value={supportMessage}
+                            onChange={(e) => setSupportMessage(e.target.value)}
+                            placeholder="Describe your issue..."
+                            className="w-full border border-slate-200 rounded-xl p-4 outline-none focus:ring-2 focus:ring-[#C5A059]/30"
+                          />
+
+                          <div className="flex justify-between items-center">
+                            <div className="text-xs text-slate-400">
+                              Support usually replies within 1 hour
+                            </div>
+
+                            <button
+                              onClick={sendSupport}
+                              className="bg-[#C5A059] text-white px-6 py-2 rounded-xl font-semibold hover:bg-[#b8934e]"
+                            >
+                              Send Message
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <AnimatePresence>
+                  {showSupport && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+
+                <div className="group relative overflow-hidden bg-white/80 backdrop-blur-md border border-slate-100 rounded-3xl p-5 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(239,68,68,0.08)] hover:border-red-100/50">
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center transition-colors duration-300 group-hover:bg-red-50">
+                        <LogOut
+                          className="text-slate-400 transition-colors duration-300 group-hover:text-red-500"
+                          size={24}
+                          strokeWidth={1.5}
+                        />
+                      </div>
+                      <div>
+                        <h4 className="text-[17px] font-bold text-slate-800 tracking-tight">
+                          Logout
+                        </h4>
+                        <p className="text-[13px] text-slate-400 font-medium">
+                          Securely sign out of your session
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="px-6 py-2.5 rounded-xl text-sm font-bold text-red-500 bg-red-50/50 sm:opacity-0 sm:translate-x-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 hover:bg-red-500 hover:text-white active:scale-95 cursor-pointer"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-red-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
               </div>
             )}

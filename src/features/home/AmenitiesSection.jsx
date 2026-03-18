@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 import { Wifi, Dumbbell, Car, Coffee, Waves, ShieldCheck } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";

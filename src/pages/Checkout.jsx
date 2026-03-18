@@ -18,7 +18,6 @@ import {
   Trash2,
   Edit2,
 } from "lucide-react";
-// import { City } from "country-state-city";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -26,8 +25,6 @@ export default function Checkout() {
   const { cart, removeItem, addItem, clearCart } = useCartStore();
   const { user, accessToken } = useSelector((state) => state.auth);
   const { address, setAddressField, clearAddress } = useCheckoutStore();
-
-  // const [cities] = useState(() => City.getCitiesOfCountry("IN"));
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -64,23 +61,11 @@ export default function Checkout() {
   );
   const taxes = subtotal * 0.05;
   const total = subtotal + taxes;
-
-  // const isAddressValid = useMemo(() => {
-  //   const pinRegex = /^[1-9][0-9]{5}$/;
-  //   return (
-  //     address.street?.trim().length >= 3 &&
-  //     address.landmark?.trim().length >= 3 &&
-  //     address.city?.trim().length >= 2 &&
-  //     pinRegex.test(address.pincode)
-  //   );
-  // }, [address]);
-
   const isAddressValid = useMemo(() => {
-  return (
-    address.street?.trim().length >= 3 &&
-    address.landmark?.trim().length >= 3
-  );
-}, [address]);
+    return (
+      address.street?.trim().length >= 3 && address.landmark?.trim().length >= 3
+    );
+  }, [address]);
 
   const handleAddNewAddress = async () => {
     if (!isAddressValid) return;
@@ -115,31 +100,20 @@ export default function Checkout() {
     }
   };
 
-  // const handleEditAddress = (addr) => {
-  //   setEditingId(addr._id);
-  //   setAddressField("street", addr.street);
-  //   setAddressField("landmark", addr.landmark);
-  //   setAddressField("city", addr.city);
-  //   setAddressField("pincode", addr.pincode);
-  //   setAddressTag(addr.label);
-  //   setShowForm(true);
-  // };
-
-
   const handleEditAddress = (addr) => {
-  setEditingId(addr._id);
-  setAddressField("street", addr.street);
-  setAddressField("landmark", addr.landmark);
-  setAddressTag(addr.label);
-  setShowForm(true);
-};
+    setEditingId(addr._id);
+    setAddressField("street", addr.street);
+    setAddressField("landmark", addr.landmark);
+    setAddressTag(addr.label);
+    setShowForm(true);
+  };
+
   const handleOrder = async () => {
     if (!selectedAddress || loading) return;
 
     setLoading(true);
 
     try {
-      console.log("$$$ items", items)
       const payload = {
         items: items.map((i) => {
           if (i.combo) {
@@ -154,9 +128,12 @@ export default function Checkout() {
             quantity: i.quantity,
           };
         }),
-        address: selectedAddress,
+
+        addressId: selectedAddress._id,
       };
-      console.log("$$$ payload",payload);
+
+      console.log("🚀 FINAL PAYLOAD:", payload);
+
       const res = await axiosClient.post("/orders", payload);
 
       const order = res.data.data;
@@ -176,7 +153,6 @@ export default function Checkout() {
       setLoading(false);
     }
   };
-
   const animationVariants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 10 },
     visible: { opacity: 1, y: 0 },
@@ -284,8 +260,6 @@ export default function Checkout() {
                         {addr.label}
                       </p>
                       <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-                        {/* {addr.street}, {addr.landmark}, {addr.city} -{" "}
-                        {addr.pincode} */}
                         {addr.street}, {addr.landmark}
                       </p>
                     </div>
@@ -398,50 +372,7 @@ export default function Checkout() {
                         }
                       />
                     </div>
-                    {/* <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
-                        City
-                      </label>
-                      <select
-                        required
-                        name="city"
-                        value={address.city || ""}
-                        className="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-[#C6A45C]/20 focus:border-[#C6A45C] outline-none p-3.5 rounded-xl text-sm transition-all appearance-none cursor-pointer"
-                        onChange={(e) =>
-                          setAddressField(e.target.name, e.target.value)
-                        }
-                      >
-                        <option value="" disabled hidden>
-                          Select City
-                        </option>
-                        {cities.map((c, idx) => (
-                          <option key={idx} value={c.name}>
-                            {c.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div> */}
-                    <div className="space-y-1.5">
-                      {/* <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider ml-1">
-                        Pincode (6 Digits)
-                      </label> */}
-                      {/* <input
-                        required
-                        name="pincode"
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        placeholder="e.g. 400001"
-                        value={address.pincode || ""}
-                        className="w-full bg-white border border-gray-200 focus:ring-2 focus:ring-[#C6A45C]/20 focus:border-[#C6A45C] outline-none p-3.5 rounded-xl text-sm transition-all"
-                        onChange={(e) =>
-                          setAddressField(
-                            e.target.name,
-                            e.target.value.replace(/\D/g, ""),
-                          )
-                        }
-                      /> */}
-                    </div>
+                    <div className="space-y-1.5"></div>
                   </div>
 
                   <div className="flex gap-3 mt-6">

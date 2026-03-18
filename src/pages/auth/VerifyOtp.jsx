@@ -1,7 +1,8 @@
-import { useState } from "react";
+/* eslint-disable no-unused-vars */
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router-dom";
-import { verifyOtpApi } from "../../api/auth.api";
+import { verifyOtpApi, sendOtpApi } from "../../api/auth.api";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../../store/authSlice";
 import { ShieldCheck, ArrowRight, RefreshCcw } from "lucide-react";
@@ -11,12 +12,15 @@ import { useAuthStore } from "../../store/auth.store";
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState("");
 
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { setAuth } = useAuthStore.getState();
+
   const phone = state?.phone || "";
 
   const fadeInUp = {
@@ -24,6 +28,16 @@ export default function VerifyOtp() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.45, ease: "easeOut" },
   };
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCooldown((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleVerify = async (e) => {
     e?.preventDefault();
@@ -64,7 +78,7 @@ export default function VerifyOtp() {
       );
 
       const redirectPath = state?.redirectPath || "/";
-      console.log("$$$redirect path", redirectPath);
+
       navigate(redirectPath, {
         replace: true,
         state: {
@@ -73,12 +87,34 @@ export default function VerifyOtp() {
       });
     } catch (err) {
       setError(
-        err?.message || "The code you entered is invalid. Please try again.",
+        err?.response?.data?.message ||
+          err?.message ||
+          "The code you entered is invalid. Please try again.",
       );
     } finally {
       setLoading(false);
     }
   };
+
+  const handleResendOtp = async () => {
+    if (!phone || cooldown > 0) return;
+
+    try {
+      setResendLoading(true);
+      setError("");
+
+      await sendOtpApi({ phone });
+
+      setCooldown(60);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || "Failed to resend verification code",
+      );
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAF9F6] px-4">
       <div className="absolute top-0 left-0 w-full h-1.5 bg-[#C6A45C]" />
@@ -141,7 +177,7 @@ export default function VerifyOtp() {
 
           <motion.button
             whileTap={{ scale: 0.98 }}
-            disabled={loading || otp.length < 4}
+            disabled={loading || otp.length < 6}
             className="w-full bg-[#1a1a1a] text-white py-5 text-[11px] font-bold tracking-[0.2em] uppercase flex items-center justify-center gap-2 disabled:opacity-40"
           >
             {loading ? (
@@ -156,10 +192,19 @@ export default function VerifyOtp() {
         </form>
 
         <div className="mt-10 text-center">
-          <button className="flex items-center justify-center gap-2 mx-auto text-gray-400 hover:text-[#C6A45C] transition">
+          <button
+            onClick={handleResendOtp}
+            disabled={resendLoading || cooldown > 0}
+            className="flex items-center justify-center gap-2 mx-auto text-gray-400 hover:text-[#C6A45C] transition disabled:opacity-40"
+          >
             <RefreshCcw size={12} />
+
             <span className="text-[11px] uppercase tracking-widest font-bold">
-              Resend Code
+              {cooldown > 0
+                ? `Resend in ${cooldown}s`
+                : resendLoading
+                  ? "Sending..."
+                  : "Resend Code"}
             </span>
           </button>
 

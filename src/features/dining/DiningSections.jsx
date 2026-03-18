@@ -41,23 +41,24 @@ export default function DiningSections() {
   const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
+  const [offers, setOffers] = useState([]);
 
- 
   const fetchData = async () => {
     setLoading(true);
 
     try {
-      const [menuRes, catRes, comboRes] = await Promise.all([
+      const [menuRes, catRes, comboRes, offerRes] = await Promise.all([
         axiosClient.get("/menu"),
         axiosClient.get("/categories"),
-       axiosClient.get("/dining/combos"),
+        axiosClient.get("/dining/combos"),
+        axiosClient.get("/admin/dining/offers"),
       ]);
 
       const menuData = menuRes.data.data || [];
       const catData = catRes.data.data || [];
 
       setMenuItems(menuData);
- 
+
       const hasJainItems = menuData.some((item) => item.isJain === true);
 
       if (hasJainItems) {
@@ -65,7 +66,7 @@ export default function DiningSections() {
           _id: "jain-category",
           name: "Jain",
           image: {
-            url:jainFood, 
+            url: jainFood,
           },
           isVirtual: true,
         });
@@ -74,6 +75,7 @@ export default function DiningSections() {
       setCategories(catData);
 
       setCombos(comboRes?.data?.data || []);
+      setOffers(offerRes?.data?.data || []);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
@@ -85,47 +87,47 @@ export default function DiningSections() {
   }, []);
 
   const filteredItems = useMemo(() => {
-  const query = searchQuery.trim().toLowerCase();
-  let items = [...menuItems];
+    const query = searchQuery.trim().toLowerCase();
+    let items = [...menuItems];
 
-  console.log("All Menu Items:", items);
-  console.log("Search Query:", query);
-  console.log("Active Category:", activeCategory);
+    console.log("All Menu Items:", items);
+    console.log("Search Query:", query);
+    console.log("Active Category:", activeCategory);
 
-  if (query.length > 0) {
-    const regex = new RegExp(query, "i");
+    if (query.length > 0) {
+      const regex = new RegExp(query, "i");
 
-    items = items.filter((item) => {
-      const nameMatch = regex.test(item.name || "");
-      const categoryMatch = regex.test(item.category?.name || "");
-      const jainMatch = query.includes("jain") && item.isJain === true;
+      items = items.filter((item) => {
+        const nameMatch = regex.test(item.name || "");
+        const categoryMatch = regex.test(item.category?.name || "");
+        const jainMatch = query.includes("jain") && item.isJain === true;
 
-      console.log("Checking Item:", item.name);
-      console.log("Name Match:", nameMatch);
-      console.log("Category Match:", categoryMatch);
-      console.log("Jain Match:", jainMatch);
+        console.log("Checking Item:", item.name);
+        console.log("Name Match:", nameMatch);
+        console.log("Category Match:", categoryMatch);
+        console.log("Jain Match:", jainMatch);
 
-      return nameMatch || categoryMatch || jainMatch;
-    });
+        return nameMatch || categoryMatch || jainMatch;
+      });
 
-    console.log("Filtered Items After Search:", items);
+      console.log("Filtered Items After Search:", items);
+      return items;
+    }
+
+    if (activeCategory?.toLowerCase() === "jain") {
+      items = items.filter((item) => item.isJain === true);
+      console.log("Filtered Jain Category Items:", items);
+    } else if (activeCategory !== "All") {
+      items = items.filter(
+        (item) =>
+          item.category?.name?.toLowerCase() === activeCategory.toLowerCase(),
+      );
+      console.log("Filtered Category Items:", items);
+    }
+
+    console.log("Final Filtered Items:", items);
     return items;
-  }
-
-  if (activeCategory?.toLowerCase() === "jain") {
-    items = items.filter((item) => item.isJain === true);
-    console.log("Filtered Jain Category Items:", items);
-  } else if (activeCategory !== "All") {
-    items = items.filter(
-      (item) =>
-        item.category?.name?.toLowerCase() === activeCategory.toLowerCase()
-    );
-    console.log("Filtered Category Items:", items);
-  }
-
-  console.log("Final Filtered Items:", items);
-  return items;
-}, [menuItems, activeCategory, searchQuery]);
+  }, [menuItems, activeCategory, searchQuery]);
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { clientWidth } = scrollRef.current;
@@ -224,11 +226,8 @@ export default function DiningSections() {
           ) : (
             <AnimatePresence mode="wait">
               {filteredItems.length > 0 ? (
-                // <motion.div
-                //   key={activeCategory}
                 <motion.div
-  key={activeCategory + searchQuery}
-
+                  key={activeCategory + searchQuery}
                   variants={containerVars}
                   initial={shouldReduceMotion ? "visible" : "hidden"}
                   animate="visible"
@@ -305,6 +304,67 @@ export default function DiningSections() {
                 );
               })}
             </motion.div>
+          </div>
+        </section>
+      )}
+      {offers.length > 0 && (
+        <section className="py-12 bg-white border-b border-gray-100">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <h2 className="text-2xl md:text-3xl font-serif font-bold border-l-4 border-[#C6A45C] pl-4 mb-10">
+              Best Offers For You
+            </h2>
+
+            <div className="space-y-16">
+              {offers.map((offer) => (
+                <div key={offer._id} className="space-y-6">
+                  <div className="relative h-48 rounded-2xl overflow-hidden shadow-md">
+                    <img
+                      src={offer.image?.url}
+                      alt={offer.name}
+                      className="w-full h-full object-cover"
+                    />
+
+                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-6 text-white">
+                      <h3 className="text-xl md:text-2xl font-bold">
+                        {offer.name}
+                      </h3>
+
+                      <p className="text-sm opacity-90">
+                        {offer.discountType === "PERCENTAGE"
+                          ? `${offer.discountValue}% OFF`
+                          : `₹${offer.discountValue} OFF`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {offer.items?.length > 0 && (
+                    <motion.div
+                      variants={containerVars}
+                      initial="hidden"
+                      animate="visible"
+                      className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                    >
+                      {offer.items.map((item) => {
+                        const offerDish = {
+                          ...item,
+                          offer: {
+                            discountType: offer.discountType,
+                            discountValue: offer.discountValue,
+                            endDate: offer.endDate,
+                          },
+                        };
+
+                        return (
+                          <motion.div key={item._id} variants={itemVars}>
+                            <DishCard dish={offerDish} />
+                          </motion.div>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
       )}

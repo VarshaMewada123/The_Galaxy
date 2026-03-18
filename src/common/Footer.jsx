@@ -113,14 +113,25 @@ const Footer = memo(function Footer() {
               Defining luxury through personalized service and exquisite
               surroundings in the heart of Chhindwara.
             </p>
+
             <div className="flex gap-4">
               {[
-                { Icon: Facebook, href: "#", label: "Facebook" },
-                { Icon: Instagram, href: "#", label: "Instagram" },
+                {
+                  Icon: Facebook,
+                  href: "https://www.facebook.com/share/G1kgjzf1gCert22Y/",
+                  label: "Facebook",
+                },
+                {
+                  Icon: Instagram,
+                  href: "https://www.instagram.com/hotel_the_galaxy_?igsh=MWl0Y3Zyb295am4zYw==",
+                  label: "Instagram",
+                },
               ].map((social, i) => (
                 <motion.a
                   key={i}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={social.label}
                   whileHover={!prefersReducedMotion ? { y: -3 } : {}}
                   className="p-3 border border-slate-800 rounded-full hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer"
@@ -128,8 +139,11 @@ const Footer = memo(function Footer() {
                   <social.Icon size={18} />
                 </motion.a>
               ))}
+
               <motion.a
-                href="#"
+                href="https://twitter.com/"
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label="X (formerly Twitter)"
                 whileHover={!prefersReducedMotion ? { y: -3 } : {}}
                 className="p-3 border border-slate-800 rounded-full hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer"
@@ -200,7 +214,7 @@ const Footer = memo(function Footer() {
                   className="shrink-0 transition-transform group-hover:scale-110"
                   style={{ color: GOLD_COLOR }}
                 />
-                info@hotelgalaxy.in
+                gmhotelthegalaxy@gmail.com
               </a>
             </div>
           </motion.address>

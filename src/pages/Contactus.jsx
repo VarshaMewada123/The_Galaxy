@@ -141,10 +141,16 @@ export default function Contact() {
             </div>
 
             <div className="rounded-xl overflow-hidden border border-[#020617]/10 shadow-md w-full aspect-[16/10] sm:aspect-[16/9]">
-              <iframe
+              {/* <iframe
                 title="map"
                 loading="lazy"
                 src="https://maps.google.com/maps?q=PG%20College%20Road%20Lalbagh%20Chhindwara&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                className="w-full h-full border-0"
+              /> */}
+              <iframe
+                title="Hotel The Galaxy Location"
+                loading="lazy"
+                src="https://www.google.com/maps?q=Hotel%20The%20Galaxy%20Chhindwara&z=16&output=embed"
                 className="w-full h-full border-0"
               />
             </div>

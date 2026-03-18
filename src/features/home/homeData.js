@@ -1,5 +1,4 @@
 export const heroImages = [
-  // "public/images/image.png",
   "public/images/g.png",
   "public/images/home4.jpeg",
   "public/images/DSC00677.jpg.jpeg",

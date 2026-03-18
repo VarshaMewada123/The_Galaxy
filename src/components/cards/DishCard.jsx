@@ -1,5 +1,3 @@
-
-
 /* eslint-disable no-unused-vars */
 import { motion, useReducedMotion } from "framer-motion";
 import { Star, Plus } from "lucide-react";
@@ -14,9 +12,15 @@ export default function DishCard({ dish, index }) {
   const handleAddToCart = (e) => {
     e.stopPropagation();
 
-    const payload = dish.isCombo
-      ? { ...dish, combo: dish._id }
-      : { ...dish, menuItems: dish._id };
+    const price = dish.finalPrice ?? dish.price ?? dish.basePrice;
+
+    const payload = {
+      _id: dish._id,
+      name: dish.name,
+      price,
+      images: dish.images,
+      isCombo: dish.isCombo || false,
+    };
 
     addItem(payload);
 
@@ -24,7 +28,6 @@ export default function DishCard({ dish, index }) {
       setQuantity((q) => q - 1);
     }
   };
-
   const cardVariants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
     visible: {
@@ -66,7 +69,6 @@ export default function DishCard({ dish, index }) {
         {/* PRICE BADGE */}
         <div className="absolute top-3 left-3 bg-black/80 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-sm font-bold tracking-tight flex items-center gap-2">
           ₹{price}
-
           {dish.savings > 0 && (
             <span className="line-through text-gray-300 text-[11px]">
               ₹{originalPrice}
@@ -100,18 +102,26 @@ export default function DishCard({ dish, index }) {
         </div>
       </div>
 
-      {/* CONTENT */}
+ 
       <div className="p-4 flex flex-col flex-grow">
         <div className="flex justify-between items-start mb-2">
           <p className="text-[#C6A45C] text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-bold truncate pr-2">
             {dish.category?.name || "Main Course"}
           </p>
 
+
           <div className="flex items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded border border-green-100">
             <span className="text-[11px] font-bold text-green-700">
-              {dish.rating || "4.2"}
+              {dish.rating ? dish.rating.toFixed(1) : "New"}
             </span>
+
             <Star size={10} className="fill-green-700 text-green-700" />
+
+            {dish.reviewCount > 0 && (
+              <span className="text-[10px] text-gray-400">
+                ({dish.reviewCount})
+              </span>
+            )}
           </div>
         </div>
 

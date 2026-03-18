@@ -19,8 +19,7 @@ export const useCheckoutStore = create(
           address: { ...state.address, [key]: value },
         })),
 
-      setFullAddress: (data) =>
-        set(() => ({ address: data })),
+      setFullAddress: (data) => set(() => ({ address: data })),
 
       clearAddress: () =>
         set({
@@ -37,6 +36,6 @@ export const useCheckoutStore = create(
     }),
     {
       name: "checkout-storage",
-    }
-  )
+    },
+  ),
 );

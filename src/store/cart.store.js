@@ -19,9 +19,7 @@ export const useCartStore = create((set, get) => ({
 
     const cart = { ...get().cart };
 
-    const existing = cart.items.find(
-      (i) => i.dishId === item._id
-    );
+    const existing = cart.items.find((i) => i.dishId === item._id);
 
     if (existing) {
       existing.quantity += 1;
@@ -30,10 +28,10 @@ export const useCartStore = create((set, get) => ({
       cart.items.push({
         dishId: item._id,
         name: item.name,
-        price: item.basePrice,
+        price: item.price ?? item.finalPrice ?? item.basePrice,
         image: item.images?.[0]?.url,
         quantity: 1,
-        combo : item.isCombo ? true : false
+        combo: item.isCombo ? true : false,
       });
 
       console.log("➕ New Item Added");
@@ -46,31 +44,29 @@ export const useCartStore = create((set, get) => ({
     set({ cart });
   },
 
-removeItem: (dishId) => {
-  set((state) => {
-    const existingItem = state.cart.items.find(i => i.dishId === dishId);
-    
-    if (existingItem.quantity > 1) {
-      // Quantity kam karo
-      return {
-        cart: {
-          ...state.cart,
-          items: state.cart.items.map(i => 
-            i.dishId === dishId ? { ...i, quantity: i.quantity - 1 } : i
-          )
-        }
-      };
-    } else {
-   
-      return {
-        cart: {
-          ...state.cart,
-          items: state.cart.items.filter(i => i.dishId !== dishId)
-        }
-      };
-    }
-  });
-},
+  removeItem: (dishId) => {
+    set((state) => {
+      const existingItem = state.cart.items.find((i) => i.dishId === dishId);
+
+      if (existingItem.quantity > 1) {
+        return {
+          cart: {
+            ...state.cart,
+            items: state.cart.items.map((i) =>
+              i.dishId === dishId ? { ...i, quantity: i.quantity - 1 } : i,
+            ),
+          },
+        };
+      } else {
+        return {
+          cart: {
+            ...state.cart,
+            items: state.cart.items.filter((i) => i.dishId !== dishId),
+          },
+        };
+      }
+    });
+  },
 
   clearCart: () => {
     console.log("🧹 CART CLEARED");
