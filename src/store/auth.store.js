@@ -22,7 +22,9 @@ export const useAuthStore = create(
         set({
           user: null,
           accessToken: null,
-        }),
+          localStorage : null,
+          sessionStorage : null,
+        })
     }),
     {
       name: "auth-storage",

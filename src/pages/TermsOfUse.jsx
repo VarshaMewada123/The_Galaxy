@@ -2,78 +2,79 @@ import React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 const SECTIONS = [
+  // TERMS
   {
-    title: "1. Introduction to the Site",
+    category: "Terms & Conditions",
+    title: "Acceptance of Terms",
     content: [
-      "This website and the related websites contained herein (collectively, the “Site”) make available information on hotels, resorts, and other transient stay facilities owned, managed or franchised by The Galaxy Hotel.",
-      "The Site is offered exclusively by The Galaxy Hotel and/or its various third party providers and distributors.",
+      "By placing an order through our website, customers agree to these terms.",
     ],
   },
   {
-    title: "2. Acceptance of Conditions",
+    category: "Terms & Conditions",
+    title: "Orders",
+    content: ["Orders are subject to acceptance and availability."],
+  },
+  {
+    category: "Terms & Conditions",
+    title: "Pricing",
     content: [
-      "In accessing, using, viewing, transmitting, caching or storing this Site, you shall be deemed to have agreed to each and all the Conditions and notices in this Site without modification.",
-      "If you do not accept these Conditions, you must refrain from using the Site.",
+      "Prices listed may change without notice.",
+      "Taxes and delivery charges may apply.",
     ],
   },
   {
-    title: "3. Use of Website",
+    category: "Terms & Conditions",
+    title: "Payments",
     content: [
-      "This website is provided for informational purposes and to allow guests to make reservations and learn about our services.",
-      "You agree to use the website only for lawful purposes and not to engage in any activity that may damage or disrupt the website’s operation.",
+      "Customers may pay via approved online payment methods available on the website.",
     ],
   },
   {
-    title: "4. Reservations and Bookings",
+    category: "Terms & Conditions",
+    title: "Service & Liability",
     content: [
-      "All reservations made through this website are subject to availability and confirmation by The Galaxy Hotel.",
-      "The hotel reserves the right to cancel or modify reservations in cases of incorrect information, suspected fraud, or unavoidable operational circumstances.",
+      "Customers must ensure delivery details are correct before confirming an order.",
+      "Hotel The Galaxy is not responsible for delays due to external factors like traffic or weather.",
+    ],
+  },
+
+  // REFUND
+  {
+    category: "Refund & Cancellation",
+    title: "Order Booking and Financial Terms",
+    content: [
+      "All payments must be made in Indian Rupees using approved methods.",
+      "Prices are subject to change; taxes and delivery charges may apply.",
     ],
   },
   {
-    title: "5. Pricing and Payments",
+    category: "Refund & Cancellation",
+    title: "Order Cancellation",
     content: [
-      "Room rates and service prices displayed on the website are subject to change without prior notice.",
-      "Payments are processed through secure third-party payment providers. The Galaxy Hotel does not store complete payment card details.",
+      "Orders can only be cancelled before preparation begins.",
+      "Hotel The Galaxy may cancel orders due to unavailability or technical issues.",
     ],
   },
   {
-    title: "6. Intellectual Property",
+    category: "Refund & Cancellation",
+    title: "Refund Eligibility",
     content: [
-      "All content on this website including text, images, branding, logos, and design elements are the property of The Galaxy Hotel unless otherwise stated.",
-      "Nothing contained on the Site should be construed as granting any licence or right to use any of the trademarks without written permission.",
+      "Refunds apply if the order is cancelled before preparation.",
+      "Refunds may also apply if payment is made but the order is not confirmed or incorrect.",
     ],
   },
   {
-    title: "7. User Conduct",
+    category: "Refund & Cancellation",
+    title: "Refund Processing",
     content: [
-      "Users must not attempt unauthorized access to the website, servers, or connected systems.",
-      "Any misuse including data scraping, hacking attempts, or malicious activities may result in legal action.",
-    ],
-  },
-  {
-    title: "8. Limitation of Liability",
-    content: [
-      "While we strive to ensure accurate information, The Galaxy Hotel does not guarantee that website content will always be error-free.",
-      "The hotel shall not be liable for any indirect or consequential damages arising from the use of this website.",
-    ],
-  },
-  {
-    title: "9. Privacy",
-    content: [
-      "Use of this website is also governed by our Privacy Policy, which explains how personal information is collected and used.",
-    ],
-  },
-  {
-    title: "10. Governing Law",
-    content: [
-      "These Terms of Use shall be governed by and interpreted in accordance with the laws of India.",
-      "Any disputes shall be resolved by arbitration in chhidwara, India, conducted in English.",
+      "Refunds are processed to the original payment method.",
+      "Processing may take 5–7 working days.",
     ],
   },
 ];
 
-const TermsOfUse = () => {
+const TermsAndRefund = () => {
   const shouldReduceMotion = useReducedMotion();
 
   const containerVars = {
@@ -81,119 +82,125 @@ const TermsOfUse = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08,
-        delayChildren: 0.1,
+        staggerChildren: shouldReduceMotion ? 0 : 0.08,
+        delayChildren: shouldReduceMotion ? 0 : 0.1,
       },
     },
   };
 
   const itemVars = {
-    hidden: {
-      opacity: 0,
-      y: shouldReduceMotion ? 0 : 15,
-    },
+    hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 15 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: [0.215, 0.61, 0.355, 1] },
+      transition: { duration: 0.5, ease: "easeOut" },
     },
   };
 
-  const lastUpdated = new Date().toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
+  const lastUpdated = "15 March 2026";
 
   return (
-    <main className="min-h-screen bg-white text-stone-800 selection:bg-stone-200">
+    <main className="min-h-screen bg-white text-stone-800">
       <div className="mx-auto max-w-5xl px-5 py-24 sm:px-10 lg:py-32">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={containerVars}
-          className="w-full"
-        >
+        <motion.div initial="hidden" animate="visible" variants={containerVars}>
+          
+          {/* HEADER */}
           <motion.header
             variants={itemVars}
             className="mb-16 border-b border-stone-200 pb-12"
           >
-            <h1 className="mb-6 font-serif text-4xl font-light leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
-              General <span className="text-[#B5924B]">Terms & Conditions</span>
+            <h1 className="text-3xl sm:text-5xl text-stone-900 mb-4">
+              Terms, Conditions &{" "}
+              <span className="text-[#B5924B]">Refund Policy</span>
             </h1>
-            <div className="flex items-center gap-3">
-              <span className="h-px w-8 bg-[#B5924B]/40" />
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-stone-500">
-                Last Updated: {lastUpdated}
-              </p>
-            </div>
+
+            <p className="text-xs uppercase tracking-[0.25em] text-stone-500">
+              Last Updated: {lastUpdated}
+            </p>
           </motion.header>
 
-          <div className="grid gap-16 lg:gap-20">
-            {SECTIONS.map((section, index) => (
-              <motion.section
-                key={index}
-                variants={itemVars}
-                className="group flex flex-col gap-4 md:flex-row md:gap-8"
-              >
-                <div className="flex-shrink-0 pt-1">
-                  <span className="font-serif text-sm font-bold tracking-tighter text-[#B5924B] opacity-60">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
+          {/* SECTIONS */}
+          <div className="space-y-16">
+            {["Terms & Conditions", "Refund & Cancellation"].map(
+              (category, catIndex) => (
+                <div key={category}>
+                  
+                  {/* CATEGORY TITLE */}
+                  <motion.h2
+                    variants={itemVars}
+                    className="text-2xl font-serif text-[#B5924B] mb-8 border-l-4 border-[#B5924B] pl-4"
+                  >
+                    {category}
+                  </motion.h2>
 
-                <div className="relative flex-1 border-stone-100 transition-colors duration-500 group-hover:border-[#B5924B] md:border-l md:pl-8">
-                  <h2 className="mb-6 text-xl font-semibold tracking-tight text-stone-900 sm:text-2xl">
-                    {section.title.includes(". ")
-                      ? section.title.split(". ")[1]
-                      : section.title}
-                  </h2>
-                  <div className="space-y-5">
-                    {section.content.map((para, i) => (
-                      <p
-                        key={i}
-                        className="max-w-prose text-[16px] leading-relaxed text-stone-600 sm:text-lg"
+                  {/* ITEMS */}
+                  <div className="space-y-10">
+                    {SECTIONS.filter(
+                      (s) => s.category === category
+                    ).map((section, index) => (
+                      <motion.section
+                        key={section.title}
+                        variants={itemVars}
+                        className="flex gap-6"
                       >
-                        {para}
-                      </p>
+                        <span className="text-[#B5924B] font-bold">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+
+                        <div>
+                          <h3 className="text-lg font-semibold text-stone-900 mb-3">
+                            {section.title}
+                          </h3>
+
+                          {section.content.map((para, i) => (
+                            <p key={i} className="text-stone-600 mb-2">
+                              {para}
+                            </p>
+                          ))}
+                        </div>
+                      </motion.section>
                     ))}
                   </div>
                 </div>
-              </motion.section>
-            ))}
+              )
+            )}
           </div>
 
+          {/* FOOTER */}
           <motion.footer
             variants={itemVars}
-            className="mt-24 border border-[#C6A45C40] bg-[#fcfbf7] p-8 text-center sm:p-16"
+            className="mt-24 border border-[#C6A45C40] bg-[#fcfbf7] p-10 text-center"
           >
-            <h3 className="mb-4 font-serif text-2xl text-stone-900 sm:text-3xl">
-              Need Clarification?
+            <h3 className="text-2xl font-serif text-stone-900 mb-4">
+              Need Help?
             </h3>
-            <p className="mx-auto mb-10 max-w-md text-stone-600">
-              Our concierge team is available around the clock to assist with
-              your specific requirements.
+
+            <p className="text-stone-600 mb-6">
+              Contact Hotel The Galaxy for any queries regarding orders, refunds, or policies.
             </p>
-            <div className="flex flex-col items-center justify-center gap-6 text-sm font-medium tracking-widest sm:flex-row">
+
+            <div className="flex flex-col sm:flex-row justify-center gap-6 text-sm font-medium">
               <a
                 href="mailto:info@hotelthegalaxy.com"
-                className="border-b border-transparent pb-1 transition-all hover:border-[#C6A45C] hover:text-[#C6A45C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A45C] focus-visible:ring-offset-2"
+                className="hover:text-[#B5924B]"
               >
-                INFO@HOTELTHEGALAXY.COM
+                info@hotelthegalaxy.com
               </a>
-              <span className="hidden h-4 w-px bg-stone-300 sm:block" />
+
+              <span className="hidden sm:block text-stone-300">|</span>
+
               <a
                 href="tel:+916262633305"
-                className="border-b border-transparent pb-1 transition-all hover:border-[#C6A45C] hover:text-[#C6A45C] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A45C] focus-visible:ring-offset-2"
+                className="hover:text-[#B5924B]"
               >
                 +91 6262633305
               </a>
             </div>
           </motion.footer>
-        </motion.div>
+        </motion.div>  
       </div>
     </main>
   );
 };
 
-export default TermsOfUse;
+export default TermsAndRefund;

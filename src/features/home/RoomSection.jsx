@@ -8,7 +8,7 @@ export default function RoomsSection() {
         Our Signature Suites
       </h2>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8  lg:mx-30">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8  lg:mx-20">
         {rooms.map((room) => (
           <div
             key={room.id}

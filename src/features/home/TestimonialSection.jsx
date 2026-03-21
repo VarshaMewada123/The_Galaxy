@@ -9,8 +9,8 @@ import "swiper/css/effect-fade";
 
 export default function TestimonialSection() {
   return (
-    <section className="py-32 bg-white relative">
-      <div className="container mx-auto px-4 text-center">
+    <section className="py-32 bg-white relative  ">
+      <div className="container mx-auto px-4 text-center lg:mx-3">
         <Swiper
           modules={[Autoplay, EffectFade]}
           effect="fade"
@@ -24,7 +24,7 @@ export default function TestimonialSection() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8 }}
               >
-                <p className="text-3xl md:text-4xl font-serif italic text-gray-800 mb-12">
+                <p className="text-3xl md:text-4xl font-serif italic text-gray-800 mb-12 ">
                   “{t.text}”
                 </p>
 

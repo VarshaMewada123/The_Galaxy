@@ -99,7 +99,7 @@ export default function AmenitiesSection() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#C6A45C]/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <div className="relative max-w-7xl mx-auto px-6 sm:px-8 lg:px-10">
         <div className="max-w-3xl mb-16 md:mb-20">
           <motion.span
             initial={{ opacity: 0, x: -20 }}

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, ArrowRight } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -19,7 +19,6 @@ export default function AdminLogin() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     const { email, password } = formData;
 
     if (!email || !password) {
@@ -39,7 +38,6 @@ export default function AdminLogin() {
       }
 
       await axiosClient.post("/admin/login", { email, password });
-
       toast.success("Authentication successful!");
 
       setTimeout(() => {
@@ -54,42 +52,35 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#FAF9F6] px-4 relative overflow-hidden">
+    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-[#FAF9F6] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
       <Toaster position="top-right" reverseOrder={false} />
 
-      <div className="absolute top-0 left-0 w-full h-1.5 bg-[#C5A059]" />
+      <div className="fixed top-0 left-0 w-full h-1.5 bg-[#C5A059] z-50" />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="bg-white shadow-[0_10px_50px_rgba(0,0,0,0.04)] border border-gray-100 p-8 md:p-12 w-full max-w-[460px] relative"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="bg-white shadow-[0_15px_50px_rgba(0,0,0,0.05)] border border-gray-100 p-6 sm:p-10 md:p-12 w-full max-w-[440px] relative my-auto"
       >
-        <div className="text-center mb-10">
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-[#C5A059] uppercase tracking-[0.4em] text-[10px] font-bold block mb-3"
-          >
+        <div className="text-center mb-8 sm:mb-10">
+          <span className="text-[#C5A059] uppercase tracking-[0.3em] text-[10px] font-bold block mb-2">
             Control Panel
-          </motion.span>
-
-          <h2 className="text-3xl md:text-4xl font-serif text-[#1a1a1a]">
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-serif text-[#1a1a1a]">
             Admin Portal
           </h2>
-
-          <p className="text-gray-400 text-sm mt-3 font-light">
-            Secure access for authorized personnel only
+          <p className="text-gray-400 text-xs mt-2 font-light">
+            Secure access for authorized personnel
           </p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-7">
+        <form onSubmit={handleLogin} className="space-y-6">
           <div className="relative group">
             <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1 block">
               Administrative Email
             </label>
-            <div className="flex items-center border-b border-gray-200 group-focus-within:border-[#C5A059] transition-colors duration-300">
+            <div className="flex items-center border-b border-gray-200 group-focus-within:border-[#C5A059] transition-colors pb-1">
               <input
                 type="email"
                 placeholder="admin@hotelthegalaxy.com"
@@ -98,12 +89,9 @@ export default function AdminLogin() {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value.trim() })
                 }
-                className="w-full py-3 outline-none text-base bg-transparent placeholder:text-gray-200"
+                className="w-full py-2 outline-none text-sm sm:text-base bg-transparent placeholder:text-gray-200"
               />
-              <Mail
-                size={16}
-                className="text-gray-300 group-focus-within:text-[#C5A059] transition-colors"
-              />
+              <Mail size={16} className="text-gray-300 group-focus-within:text-[#C5A059]" />
             </div>
           </div>
 
@@ -111,7 +99,7 @@ export default function AdminLogin() {
             <label className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1 block">
               Access Password
             </label>
-            <div className="flex items-center border-b border-gray-200 group-focus-within:border-[#C5A059] transition-colors duration-300">
+            <div className="flex items-center border-b border-gray-200 group-focus-within:border-[#C5A059] transition-colors pb-1">
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
@@ -120,52 +108,44 @@ export default function AdminLogin() {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full py-3 outline-none text-base bg-transparent tracking-widest placeholder:tracking-normal placeholder:text-gray-200"
+                className="w-full py-2 outline-none text-sm sm:text-base bg-transparent tracking-widest placeholder:tracking-normal placeholder:text-gray-200"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-300 hover:text-[#C5A059] transition-colors px-2"
+                className="text-gray-300 hover:text-[#C5A059] px-2"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
-              <Lock
-                size={16}
-                className="text-gray-300 group-focus-within:text-[#C5A059] transition-colors"
-              />
+              <Lock size={16} className="text-gray-300 group-focus-within:text-[#C5A059]" />
             </div>
           </div>
 
           <button
             disabled={loading}
-            className="w-full bg-[#C5A059] text-white py-5 text-[11px] font-bold tracking-[0.2em] uppercase disabled:opacity-40 flex items-center justify-center gap-2 group transition-all hover:bg-[#b38f4d] shadow-sm"
+            className="w-full bg-[#C5A059] text-white py-4 text-[11px] font-bold tracking-[0.2em] uppercase disabled:opacity-40 flex items-center justify-center gap-2 group transition-all hover:bg-[#b38f4d] active:transform active:scale-[0.99]"
           >
-            {loading ? (
-              "Verifying Credentials..."
-            ) : (
+            {loading ? "Verifying..." : (
               <>
                 Authorize Access
-                <ArrowRight
-                  size={14}
-                  className="group-hover:translate-x-1 transition-transform"
-                />
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <Link
             to="/"
-            className="text-gray-400 text-[11px] uppercase tracking-widest font-medium hover:text-[#C5A059] transition-colors flex items-center justify-center gap-1"
+            className="text-gray-400 text-[10px] uppercase tracking-widest font-medium hover:text-[#C5A059] transition-colors"
           >
             Return to Homepage
           </Link>
         </div>
 
-        <div className="absolute bottom-0 right-0 w-16 h-16 opacity-[0.03] pointer-events-none">
-          <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
-            <path d="M0 100H100V0" stroke="currentColor" strokeWidth="1" />
+        <div className="absolute bottom-0 right-0 w-12 h-12 opacity-[0.03] pointer-events-none">
+          <svg viewBox="0 0 100 100" fill="none" className="w-full h-full text-[#C5A059]">
+            <path d="M0 100H100V0" stroke="currentColor" strokeWidth="2" />
           </svg>
         </div>
       </motion.div>

@@ -6,7 +6,7 @@ import FloatingCartBar from "@/components/cart/FloatingCartBar";
 export default function DiningPage() {
   return (
     <main className="min-h-screen bg-[#fafaf9] text-[#1c1c1c] overflow-x-hidden">
-      <section className="relative min-h-[95vh] w-full overflow-hidden">
+      {/* <section className="relative min-h-[95vh] w-full overflow-hidden">
         <motion.img
           src="/images/dh.png"
           alt="Dining Experience"
@@ -27,7 +27,7 @@ export default function DiningPage() {
             The Art of <span className="italic text-[#C6A45C]">Flavour</span>
           </h1>
         </div>
-      </section>
+      </section> */}
       <FloatingCartBar />
       <DiningSections />
     </main>

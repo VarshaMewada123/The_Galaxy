@@ -25,6 +25,7 @@ const AUTH_PATHS = [
   "/track-order",
   "/profile",
   "/verify-otp",
+   "/dining",
 ];
 
 const Header = memo(function Header() {
@@ -38,7 +39,13 @@ const Header = memo(function Header() {
 
   const user = useAuthStore((s) => s.user);
   const token = useAuthStore((s) => s.accessToken);
-  const logOut = useAuthStore((s) => s.logout);
+  const logout = useAuthStore((s) => s.logout)
+  const logOut = () =>{
+    localStorage.clear();
+    sessionStorage.clear();
+    logout();
+    navigate('/login')
+  }
 
   const isAuthPage = AUTH_PATHS.some((path) =>
     location.pathname.startsWith(path),
@@ -229,7 +236,7 @@ const Header = memo(function Header() {
                   >
                     <Link
                       to={link.path}
-                      className={`text-3xl font-serif ${
+                      className={`text-sm uppercase tracking-widest font-semibold ${
                         location.pathname === link.path
                           ? "text-[#C6A45C]"
                           : "text-black"

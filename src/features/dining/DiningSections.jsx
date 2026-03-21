@@ -51,7 +51,7 @@ export default function DiningSections() {
         axiosClient.get("/menu"),
         axiosClient.get("/categories"),
         axiosClient.get("/dining/combos"),
-        axiosClient.get("/admin/dining/offers"),
+        axiosClient.get("/dining/offers"),
       ]);
 
       const menuData = menuRes.data.data || [];
@@ -138,14 +138,12 @@ export default function DiningSections() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] selection:bg-[#C6A45C] selection:text-white">
+    <main className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] selection:bg-[#C6A45C] selection:text-white py-10">
       <section className="pt-8 pb-12 bg-white border-b border-gray-100 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="space-y-2">
-              <span className="text-[#C6A45C] font-bold tracking-[0.3em] uppercase text-[10px] md:text-xs block">
-                Selection
-              </span>
+    
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-[#02060c] tracking-tight">
                 What's on your mind?
               </h2>
@@ -307,7 +305,7 @@ export default function DiningSections() {
           </div>
         </section>
       )}
-      {offers.length > 0 && (
+      {/* {offers.length > 0 && (
         <section className="py-12 bg-white border-b border-gray-100">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
             <h2 className="text-2xl md:text-3xl font-serif font-bold border-l-4 border-[#C6A45C] pl-4 mb-10">
@@ -367,7 +365,99 @@ export default function DiningSections() {
             </div>
           </div>
         </section>
-      )}
+      )} */}
+
+      {/* --- Offers Section Optimized --- */}
+{offers.length > 0 && (
+  <section className="py-20 bg-[#FDFCFB]"> {/* Soft warm background */}
+    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+      <div className="flex flex-col items-center mb-16 text-center">
+        <span className="text-[#C6A45C] font-bold tracking-[0.3em] uppercase text-xs mb-3">
+          Exclusive Rewards
+        </span>
+        <h2 className="text-3xl md:text-5xl font-serif font-bold text-[#1A1A1A]">
+          Best Offers For You
+        </h2>
+        <div className="w-24 h-1 bg-[#C6A45C] mt-6 rounded-full" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-20">
+        {offers.map((offer) => (
+          <div key={offer._id} className="group">
+            {/* Banner Style Offer Header */}
+            <div className="relative h-[250px] md:h-[350px] rounded-[2rem] overflow-hidden shadow-2xl mb-12">
+              <img
+                src={offer.image?.url}
+                alt={offer.name}
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+              />
+              {/* Floating Badge */}
+              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border border-[#C6A45C]/20 flex flex-col items-center justify-center">
+                <span className="text-[#C6A45C] text-xs font-bold uppercase tracking-widest">Limited Time</span>
+                <span className="text-2xl font-serif font-black text-[#1A1A1A]">
+                  {offer.discountType === "PERCENTAGE"
+                    ? `${offer.discountValue}% OFF`
+                    : `₹${offer.discountValue} OFF`}
+                </span>
+              </div>
+              
+              {/* Gradient Overlay (Lighter) */}
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-60" />
+              
+              {/* Offer Info Floating at Bottom */}
+              <div className="absolute bottom-8 left-8 right-8">
+                <div className="bg-white/80 backdrop-blur-xl p-6 md:p-8 rounded-[1.5rem] border border-white inline-block shadow-lg">
+                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#1A1A1A]">
+                    {offer.name}
+                  </h3>
+                  <p className="text-gray-600 mt-2 max-w-md italic">
+                    Experience the finest flavors with our exclusive seasonal discount.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Applicable Dishes Grid */}
+            {offer.items?.length > 0 && (
+              <div className="relative px-4">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="h-[1px] flex-1 bg-gray-200" />
+                  <span className="text-sm font-medium text-gray-400 uppercase tracking-[0.2em]">Available Dishes</span>
+                  <div className="h-[1px] flex-1 bg-gray-200" />
+                </div>
+                
+                <motion.div
+                  variants={containerVars}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                >
+                  {offer.items.map((item) => {
+                    const offerDish = {
+                      ...item,
+                      offer: {
+                        discountType: offer.discountType,
+                        discountValue: offer.discountValue,
+                        endDate: offer.endDate,
+                      },
+                    };
+
+                    return (
+                      <motion.div key={item._id} variants={itemVars} className="hover:translate-y-[-8px] transition-transform duration-300">
+                        <DishCard dish={offerDish} />
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
 
       <section className="py-24 bg-[#0A0A0A] text-white">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-8 space-y-24 md:space-y-40">
