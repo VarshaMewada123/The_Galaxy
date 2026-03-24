@@ -42,17 +42,37 @@ export default function DiningSections() {
   const scrollRef = useRef(null);
   const shouldReduceMotion = useReducedMotion();
   const [offers, setOffers] = useState([]);
+  const [availability, setAvailability] = useState(null);
+
+  const isOrderingAllowed = () => {
+    if (!availability) return false;
+    if (!availability.isOrderingEnabled) return false;
+    if (availability.isTemporarilyClosed) return false;
+
+    const now = new Date();
+    const currentTime = now.toTimeString().slice(0, 5);
+
+    if (
+      currentTime < availability.kitchenStartTime ||
+      currentTime > availability.kitchenEndTime
+    ) {
+      return false;
+    }
+
+    return true;
+  };
 
   const fetchData = async () => {
     setLoading(true);
-
     try {
-      const [menuRes, catRes, comboRes, offerRes] = await Promise.all([
-        axiosClient.get("/menu"),
-        axiosClient.get("/categories"),
-        axiosClient.get("/dining/combos"),
-        axiosClient.get("/dining/offers"),
-      ]);
+      const [menuRes, catRes, comboRes, offerRes, availabilityRes] =
+        await Promise.all([
+          axiosClient.get("/menu"),
+          axiosClient.get("/categories"),
+          axiosClient.get("/dining/combos"),
+          axiosClient.get("/dining/offers"),
+          axiosClient.get("/admin/availability"),
+        ]);
 
       const menuData = menuRes.data.data || [];
       const catData = catRes.data.data || [];
@@ -65,23 +85,22 @@ export default function DiningSections() {
         catData.unshift({
           _id: "jain-category",
           name: "Jain",
-          image: {
-            url: jainFood,
-          },
+          image: { url: jainFood },
           isVirtual: true,
         });
       }
 
       setCategories(catData);
-
       setCombos(comboRes?.data?.data || []);
       setOffers(offerRes?.data?.data || []);
+      setAvailability(availabilityRes?.data?.data);
     } catch (error) {
       console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -90,44 +109,29 @@ export default function DiningSections() {
     const query = searchQuery.trim().toLowerCase();
     let items = [...menuItems];
 
-    console.log("All Menu Items:", items);
-    console.log("Search Query:", query);
-    console.log("Active Category:", activeCategory);
-
     if (query.length > 0) {
       const regex = new RegExp(query, "i");
-
-      items = items.filter((item) => {
-        const nameMatch = regex.test(item.name || "");
-        const categoryMatch = regex.test(item.category?.name || "");
-        const jainMatch = query.includes("jain") && item.isJain === true;
-
-        console.log("Checking Item:", item.name);
-        console.log("Name Match:", nameMatch);
-        console.log("Category Match:", categoryMatch);
-        console.log("Jain Match:", jainMatch);
-
-        return nameMatch || categoryMatch || jainMatch;
-      });
-
-      console.log("Filtered Items After Search:", items);
-      return items;
+      return items.filter(
+        (item) =>
+          regex.test(item.name || "") ||
+          regex.test(item.category?.name || "") ||
+          (query.includes("jain") && item.isJain === true)
+      );
     }
 
     if (activeCategory?.toLowerCase() === "jain") {
-      items = items.filter((item) => item.isJain === true);
-      console.log("Filtered Jain Category Items:", items);
+      return items.filter((item) => item.isJain === true);
     } else if (activeCategory !== "All") {
-      items = items.filter(
+      return items.filter(
         (item) =>
-          item.category?.name?.toLowerCase() === activeCategory.toLowerCase(),
+          item.category?.name?.toLowerCase() ===
+          activeCategory.toLowerCase()
       );
-      console.log("Filtered Category Items:", items);
     }
 
-    console.log("Final Filtered Items:", items);
     return items;
   }, [menuItems, activeCategory, searchQuery]);
+
   const scroll = (direction) => {
     if (scrollRef.current) {
       const { clientWidth } = scrollRef.current;
@@ -139,11 +143,12 @@ export default function DiningSections() {
 
   return (
     <main className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] selection:bg-[#C6A45C] selection:text-white py-10">
+    
+
       <section className="pt-8 pb-12 bg-white border-b border-gray-100 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="space-y-2">
-    
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-[#02060c] tracking-tight">
                 What's on your mind?
               </h2>
@@ -184,7 +189,6 @@ export default function DiningSections() {
           <nav
             ref={scrollRef}
             className="flex gap-4 md:gap-8 lg:gap-12 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-4 px-2"
-            style={{ WebkitOverflowScrolling: "touch" }}
           >
             <CategoryCircle
               name="All"
@@ -239,7 +243,10 @@ export default function DiningSections() {
                       layout
                       className="h-full"
                     >
-                      <DishCard dish={dish} />
+                      <DishCard
+                        dish={dish}
+                        isDisabled={!isOrderingAllowed()}
+                      />
                     </motion.div>
                   ))}
                 </motion.div>
@@ -297,7 +304,10 @@ export default function DiningSections() {
 
                 return (
                   <motion.div key={combo._id} variants={itemVars} layout>
-                    <DishCard dish={comboDish} />
+                    <DishCard
+                      dish={comboDish}
+                      isDisabled={!isOrderingAllowed()}
+                    />
                   </motion.div>
                 );
               })}
@@ -305,34 +315,19 @@ export default function DiningSections() {
           </div>
         </section>
       )}
-      {/* {offers.length > 0 && (
-        <section className="py-12 bg-white border-b border-gray-100">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold border-l-4 border-[#C6A45C] pl-4 mb-10">
-              Best Offers For You
-            </h2>
 
-            <div className="space-y-16">
+      {offers.length > 0 && (
+        <section className="py-20 bg-[#FDFCFB]">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <div className="grid grid-cols-1 gap-20">
               {offers.map((offer) => (
-                <div key={offer._id} className="space-y-6">
-                  <div className="relative h-48 rounded-2xl overflow-hidden shadow-md">
+                <div key={offer._id} className="group">
+                  <div className="relative h-[250px] md:h-[350px] rounded-[2rem] overflow-hidden shadow-2xl mb-12">
                     <img
                       src={offer.image?.url}
                       alt={offer.name}
                       className="w-full h-full object-cover"
                     />
-
-                    <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-6 text-white">
-                      <h3 className="text-xl md:text-2xl font-bold">
-                        {offer.name}
-                      </h3>
-
-                      <p className="text-sm opacity-90">
-                        {offer.discountType === "PERCENTAGE"
-                          ? `${offer.discountValue}% OFF`
-                          : `₹${offer.discountValue} OFF`}
-                      </p>
-                    </div>
                   </div>
 
                   {offer.items?.length > 0 && (
@@ -340,7 +335,7 @@ export default function DiningSections() {
                       variants={containerVars}
                       initial="hidden"
                       animate="visible"
-                      className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                      className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
                     >
                       {offer.items.map((item) => {
                         const offerDish = {
@@ -354,7 +349,10 @@ export default function DiningSections() {
 
                         return (
                           <motion.div key={item._id} variants={itemVars}>
-                            <DishCard dish={offerDish} />
+                            <DishCard
+                              dish={offerDish}
+                              isDisabled={!isOrderingAllowed()}
+                            />
                           </motion.div>
                         );
                       })}
@@ -365,99 +363,7 @@ export default function DiningSections() {
             </div>
           </div>
         </section>
-      )} */}
-
-      {/* --- Offers Section Optimized --- */}
-{offers.length > 0 && (
-  <section className="py-20 bg-[#FDFCFB]"> {/* Soft warm background */}
-    <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
-      <div className="flex flex-col items-center mb-16 text-center">
-        <span className="text-[#C6A45C] font-bold tracking-[0.3em] uppercase text-xs mb-3">
-          Exclusive Rewards
-        </span>
-        <h2 className="text-3xl md:text-5xl font-serif font-bold text-[#1A1A1A]">
-          Best Offers For You
-        </h2>
-        <div className="w-24 h-1 bg-[#C6A45C] mt-6 rounded-full" />
-      </div>
-
-      <div className="grid grid-cols-1 gap-20">
-        {offers.map((offer) => (
-          <div key={offer._id} className="group">
-            {/* Banner Style Offer Header */}
-            <div className="relative h-[250px] md:h-[350px] rounded-[2rem] overflow-hidden shadow-2xl mb-12">
-              <img
-                src={offer.image?.url}
-                alt={offer.name}
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
-              />
-              {/* Floating Badge */}
-              <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-xl border border-[#C6A45C]/20 flex flex-col items-center justify-center">
-                <span className="text-[#C6A45C] text-xs font-bold uppercase tracking-widest">Limited Time</span>
-                <span className="text-2xl font-serif font-black text-[#1A1A1A]">
-                  {offer.discountType === "PERCENTAGE"
-                    ? `${offer.discountValue}% OFF`
-                    : `₹${offer.discountValue} OFF`}
-                </span>
-              </div>
-              
-              {/* Gradient Overlay (Lighter) */}
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent opacity-60" />
-              
-              {/* Offer Info Floating at Bottom */}
-              <div className="absolute bottom-8 left-8 right-8">
-                <div className="bg-white/80 backdrop-blur-xl p-6 md:p-8 rounded-[1.5rem] border border-white inline-block shadow-lg">
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold text-[#1A1A1A]">
-                    {offer.name}
-                  </h3>
-                  <p className="text-gray-600 mt-2 max-w-md italic">
-                    Experience the finest flavors with our exclusive seasonal discount.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Applicable Dishes Grid */}
-            {offer.items?.length > 0 && (
-              <div className="relative px-4">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="h-[1px] flex-1 bg-gray-200" />
-                  <span className="text-sm font-medium text-gray-400 uppercase tracking-[0.2em]">Available Dishes</span>
-                  <div className="h-[1px] flex-1 bg-gray-200" />
-                </div>
-                
-                <motion.div
-                  variants={containerVars}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
-                >
-                  {offer.items.map((item) => {
-                    const offerDish = {
-                      ...item,
-                      offer: {
-                        discountType: offer.discountType,
-                        discountValue: offer.discountValue,
-                        endDate: offer.endDate,
-                      },
-                    };
-
-                    return (
-                      <motion.div key={item._id} variants={itemVars} className="hover:translate-y-[-8px] transition-transform duration-300">
-                        <DishCard dish={offerDish} />
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-)}
+      )}
 
       <section className="py-24 bg-[#0A0A0A] text-white">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-8 space-y-24 md:space-y-40">
