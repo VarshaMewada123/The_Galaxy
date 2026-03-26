@@ -1,7 +1,8 @@
+/* eslint-disable no-unused-vars */
 import { useState, useMemo } from "react";
 import toast from "react-hot-toast";
 import { motion, useReducedMotion } from "framer-motion";
-import { Phone, MapPin, Utensils, Hotel, Send, Loader2 } from "lucide-react";
+import { Phone, MapPin, Utensils, Hotel, Send, Loader2,Mail } from "lucide-react";
 import axiosClient from "@/api/axiosClient";
 export default function Contact() {
   const prefersReducedMotion = useReducedMotion();
@@ -61,7 +62,7 @@ export default function Contact() {
   return (
     <div className="bg-[#F5F5F0] text-[#020617] min-h-screen overflow-x-hidden">
       <section className="border-b border-[#020617]/5 pt-20 sm:pt-24">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-10 pb-14 sm:pt-14 sm:pb-16 lg:py-20 text-center">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 pt-10 pb-14 sm:pt-14 sm:pb-16 lg:py-1 text-center">
           <h1 className="font-bold leading-tight text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
             Contact <span className="text-[#C6A45C]">Hotel The Galaxy</span>
           </h1>
@@ -73,7 +74,7 @@ export default function Contact() {
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:py-3 sm:py-14">
         <div className="grid gap-6 md:grid-cols-2">
           <motion.div
             {...cardMotion}
@@ -112,7 +113,21 @@ export default function Contact() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
         <div className="grid gap-12 lg:grid-cols-2 items-start">
           <div className="space-y-8">
-            <div className="flex items-start gap-4">
+            <div className="rounded-xl overflow-hidden border border-[#020617]/10 shadow-md w-full aspect-[16/10] sm:aspect-[16/9]">
+              {/* <iframe
+                title="map"
+                loading="lazy"
+                src="https://maps.google.com/maps?q=PG%20College%20Road%20Lalbagh%20Chhindwara&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                className="w-full h-full border-0"
+              /> */}
+              <iframe
+                title="Hotel The Galaxy Location"
+                loading="lazy"
+                src="https://www.google.com/maps?q=Hotel%20The%20Galaxy%20Chhindwara&z=16&output=embed"
+                className="w-full h-full border-0"
+              />
+            </div>
+                        <div className="flex items-start gap-4">
               <div className="bg-white p-3 rounded-full shadow-sm shrink-0">
                 <Phone className="text-[#C6A45C]" size={20} />
               </div>
@@ -138,22 +153,26 @@ export default function Contact() {
                   Chhindwara, MP 480001
                 </p>
               </div>
+              
             </div>
+<div className="flex items-start gap-4">
+  {/* Icon Container */}
+  <div className="bg-white p-3 rounded-full shadow-sm shrink-0">
+    <Mail className="text-[#C6A45C]" size={20} />
+  </div>
 
-            <div className="rounded-xl overflow-hidden border border-[#020617]/10 shadow-md w-full aspect-[16/10] sm:aspect-[16/9]">
-              {/* <iframe
-                title="map"
-                loading="lazy"
-                src="https://maps.google.com/maps?q=PG%20College%20Road%20Lalbagh%20Chhindwara&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                className="w-full h-full border-0"
-              /> */}
-              <iframe
-                title="Hotel The Galaxy Location"
-                loading="lazy"
-                src="https://www.google.com/maps?q=Hotel%20The%20Galaxy%20Chhindwara&z=16&output=embed"
-                className="w-full h-full border-0"
-              />
-            </div>
+  {/* Text Content */}
+  <div>
+    <p className="text-xs font-bold uppercase tracking-wide text-[#020617]/50">
+      Email Address
+    </p>
+    <p className="text-gray-900">
+      <a href="mailto:gmhotelthegalaxy@gmail.com" className="hover:text-[#C6A45C] transition-colors">
+      gmhotelthegalaxy@gmail.com
+      </a>
+    </p>
+  </div>
+</div>
           </div>
 
           <form
@@ -224,7 +243,7 @@ export default function Contact() {
               <motion.button
                 whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
                 type="submit"
-                className="w-full bg-[#C6A45C] text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors duration-300 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A45C]/50"
+                className="w-full bg-[#C6A45C] text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-colors duration-300 hover:brightness-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A45C]/50 cursor-pointer disabled:bg-[#C6A45C]/70 disabled:cursor-not-allowed"
                 disabled={loading}
               >
                 {loading ? (

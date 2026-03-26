@@ -3,12 +3,11 @@ import { rooms } from "./homeData";
 
 export default function RoomsSection() {
   return (
-    <section className="py-24 bg-[#FAF9F6] container mx-auto px-4">
+    <section className="py-24 bg-[#FAF9F6] container mx-auto px-4 lg:px-20">
       <h2 className="text-3xl md:text-5xl font-serif text-center mb-16">
         Our Signature Suites
       </h2>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8  lg:mx-20">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10">
         {rooms.map((room) => (
           <div
             key={room.id}

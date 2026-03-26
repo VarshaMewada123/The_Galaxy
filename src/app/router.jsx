@@ -40,7 +40,7 @@ export default function AppRouter() {
           <Route path="rooms" element={<RoomsPage />} />
           <Route path="offers" element={<OffersPage />} />
 
-          <Route path="privacyy" element={<Privacy />} />
+          <Route path="privacy-policy" element={<Privacy />} />
           <Route path="terms-of-use" element={<TermsOfUse />} />
 
           <Route path="login" element={<Login />} />

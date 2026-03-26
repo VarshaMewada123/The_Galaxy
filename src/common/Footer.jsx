@@ -9,7 +9,8 @@ import {
   Instagram,
   X as CloseIcon,
 } from "lucide-react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"; // eslint-disable-line no-unused-vars
+import toast, { Toaster } from "react-hot-toast";
 
 const XIcon = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -22,7 +23,6 @@ const GOLD_COLOR = "#C6A45C";
 const Footer = memo(function Footer() {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
-
   const [openNewsletter, setOpenNewsletter] = useState(false);
   const [formData, setFormData] = useState({ email: "", agree: false });
 
@@ -38,11 +38,7 @@ const Footer = memo(function Footer() {
   );
 
   useEffect(() => {
-    if (openNewsletter) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = openNewsletter ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -56,47 +52,49 @@ const Footer = memo(function Footer() {
     }));
   }, []);
 
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    const loadingToast = toast.loading("Subscribing...");
+    try {
+      await axiosClient.post("/newsletter/subscribe", {
+        email: formData.email,
+      });
+      toast.success("Welcome to the Galaxy Club!", { id: loadingToast });
+      setFormData({ email: "", agree: false });
+      setOpenNewsletter(false);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error?.message ||
+        error?.message ||
+        "Something went wrong";
+
+      toast.error(message, {
+        id: loadingToast,
+      });
+    }
+  };
+
   const containerVars = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: prefersReducedMotion ? 0 : 0.1,
-      },
+      transition: { staggerChildren: prefersReducedMotion ? 0 : 0.15 },
     },
   };
 
   const itemVars = {
-    hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeOut" },
-    },
-  };
-
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await axiosClient.post("/newsletter/subscribe", {
-        email: formData.email,
-      });
-
-      alert(res.data.message);
-
-      setFormData({ email: "", agree: false });
-      setOpenNewsletter(false);
-    } catch (error) {
-      alert(error.message || "Subscription failed");
-    }
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
   };
 
   return (
     <>
-      <footer className="relative w-full bg-[#020617] text-slate-400 pt-16 md:pt-24 pb-10 border-t border-white/5 overflow-hidden">
+      <Toaster position="top-right" reverseOrder={false} />
+
+      <footer className="w-full bg-[#FAF9F6] text-slate-600 pt-16 pb-10 border-t border-slate-200 overflow-hidden">
         <motion.div
-          className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8"
+          className="max-w-7xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
@@ -104,17 +102,16 @@ const Footer = memo(function Footer() {
         >
           <motion.div
             variants={itemVars}
-            className="flex flex-col items-center sm:items-start space-y-6"
+            className="col-span-2 lg:col-span-1 flex flex-col items-center lg:items-start space-y-6"
           >
-            <h3 className="text-2xl md:text-3xl font-serif text-white tracking-tight">
+            <h3 className="text-2xl md:text-3xl font-serif text-slate-900 tracking-tight text-center lg:text-left">
               Hotel <span style={{ color: GOLD_COLOR }}>The Galaxy</span>
             </h3>
-            <p className="text-sm leading-relaxed opacity-70 max-w-xs text-center sm:text-left">
+            <p className="text-sm leading-relaxed text-center lg:text-left max-w-sm mx-auto lg:mx-0">
               Defining luxury through personalized service and exquisite
               surroundings in the heart of Chhindwara.
             </p>
-
-            <div className="flex gap-4">
+            <div className="flex gap-3 justify-center lg:justify-start">
               {[
                 {
                   Icon: Facebook,
@@ -127,45 +124,35 @@ const Footer = memo(function Footer() {
                   label: "Instagram",
                 },
               ].map((social, i) => (
-                <motion.a
+                <a
                   key={i}
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={social.label}
-                  whileHover={!prefersReducedMotion ? { y: -3 } : {}}
-                  className="p-3 border border-slate-800 rounded-full hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer"
+                  className="p-3 border border-slate-200 rounded-full text-slate-400 hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer bg-white shadow-sm"
                 >
                   <social.Icon size={18} />
-                </motion.a>
+                </a>
               ))}
-
-              <motion.a
-                href="https://twitter.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="X (formerly Twitter)"
-                whileHover={!prefersReducedMotion ? { y: -3 } : {}}
-                className="p-3 border border-slate-800 rounded-full hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer"
+              <a
+                href="https://x.com"
+                className="p-3 border border-slate-200 rounded-full text-slate-400 hover:text-[#C6A45C] hover:border-[#C6A45C] transition-all duration-300 cursor-pointer bg-white shadow-sm"
               >
                 <XIcon />
-              </motion.a>
+              </a>
             </div>
           </motion.div>
 
-          <motion.div
-            variants={itemVars}
-            className="flex flex-col items-center sm:items-start"
-          >
-            <h4 className="text-white text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">
+          <motion.div variants={itemVars} className="flex flex-col items-start">
+            <h4 className="text-slate-900 text-[10px] uppercase tracking-widest mb-6 font-bold">
               Discover
             </h4>
-            <ul className="space-y-4 text-sm text-center sm:text-left">
-              {["Rooms", "Dining", "Banquet", "Contact"].map((link) => (
+            <ul className="space-y-3 text-sm">
+              {["Rooms", "Dining", "Offers", "Contact"].map((link) => (
                 <li key={link}>
                   <Link
                     to={`/${link.toLowerCase()}`}
-                    className="hover:text-[#C6A45C] transition-colors inline-block py-1 cursor-pointer"
+                    className="hover:text-[#C6A45C] transition-colors py-1 cursor-pointer block font-medium"
                   >
                     {link}
                   </Link>
@@ -176,88 +163,79 @@ const Footer = memo(function Footer() {
 
           <motion.address
             variants={itemVars}
-            className="not-italic flex flex-col items-center sm:items-start"
+            className="not-italic flex flex-col items-start"
           >
-            <h4 className="text-white text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">
+            <h4 className="text-slate-900 text-[10px] uppercase tracking-widest mb-6 font-bold">
               Contact Us
             </h4>
-            <div className="space-y-5 text-sm">
-              <div className="flex items-start gap-4 justify-center sm:justify-start group">
+            <div className="space-y-4 text-sm">
+              <div className="flex items-start gap-3">
                 <MapPin
-                  size={20}
-                  className="shrink-0 transition-transform group-hover:scale-110"
+                  size={18}
                   style={{ color: GOLD_COLOR }}
+                  className="shrink-0 mt-1"
                 />
-                <span className="leading-relaxed">
-                  PG College Road, Lalbagh,
+                <span className="leading-tight font-medium">
+                  PG College Road,
                   <br />
-                  Chhindwara MP – 480001
+                  Lalbagh, Chhindwara
                 </span>
               </div>
+
               <a
                 href="tel:+916262633305"
-                className="flex items-center gap-4 justify-center sm:justify-start group hover:text-white transition-colors cursor-pointer"
+                className="flex items-center gap-3 hover:text-[#C6A45C] transition-colors"
               >
-                <Phone
-                  size={20}
-                  className="shrink-0 transition-transform group-hover:scale-110"
-                  style={{ color: GOLD_COLOR }}
-                />
-                +91 62626 33305
+                <Phone size={18} style={{ color: GOLD_COLOR }} />
+                <span className="font-medium whitespace-nowrap">
+                  +91 6262633305
+                </span>
               </a>
+
               <a
-                href="mailto:info@hotelgalaxy.in"
-                className="flex items-center gap-4 justify-center sm:justify-start group hover:text-white transition-colors cursor-pointer"
+                href="mailto:contact@thegalaxyhotel.com"
+                className="flex items-center gap-3 hover:text-[#C6A45C] transition-colors"
               >
-                <Mail
-                  size={20}
-                  className="shrink-0 transition-transform group-hover:scale-110"
-                  style={{ color: GOLD_COLOR }}
-                />
-                gmhotelthegalaxy@gmail.com
+                <Mail size={18} style={{ color: GOLD_COLOR }} />
+                <span className="font-medium">gmhotelthegalaxy@gmail.com</span>
               </a>
             </div>
           </motion.address>
 
           <motion.div
             variants={itemVars}
-            className="flex flex-col items-center sm:items-start"
+            className="col-span-2 lg:col-span-1 flex flex-col items-center lg:items-start border-t lg:border-none pt-8 lg:pt-0"
           >
-            <h4 className="text-white text-[10px] uppercase tracking-[0.3em] mb-8 font-bold">
+            <h4 className="text-slate-900 text-[10px] uppercase tracking-widest mb-4 font-bold">
               Newsletter
             </h4>
-            <p className="text-xs mb-6 opacity-60 text-center sm:text-left">
-              Join our mailing list for exclusive offers.
+            <p className="text-xs mb-6 text-center lg:text-left text-slate-500 max-w-xs">
+              Join our mailing list for exclusive luxury offers.
             </p>
-            <motion.button
-              whileHover={!prefersReducedMotion ? { scale: 1.05 } : {}}
-              whileTap={!prefersReducedMotion ? { scale: 0.95 } : {}}
+            <button
               onClick={() => setOpenNewsletter(true)}
-              className="w-full sm:w-auto py-4 px-10 text-[10px] font-black tracking-[0.2em] text-slate-900 rounded-sm shadow-lg hover:brightness-110 transition-all cursor-pointer"
+              className="w-full lg:w-auto py-4 px-10 text-[10px] font-bold tracking-[0.2em] rounded-sm text-white rounded-none shadow-xl hover:brightness-90 transition-all cursor-pointer"
               style={{ backgroundColor: GOLD_COLOR }}
             >
               SUBSCRIBE
-            </motion.button>
+            </button>
           </motion.div>
         </motion.div>
 
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 mt-20 pt-8 border-t border-white/20 flex flex-col md:flex-row justify-between items-center gap-8 text-[11px] tracking-[0.2em]">
-          <p className="font-medium text-#90A1B9">
-            © {currentYear} HOTEL THE GALAXY. ALL RIGHTS RESERVED.
-          </p>
-
+        <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6 text-[9px] tracking-[0.15em] text-slate-700 font-bold uppercase text-center">
+          <p>© {currentYear} HOTEL THE GALAXY. ALL RIGHTS RESERVED.</p>
           <div className="flex gap-8">
             <button
-              onClick={() => goTo("/privacyy")}
-              className="text-#90A1B9 hover:text-[#C6A45C] transition-colors uppercase cursor-pointer"
+              onClick={() => goTo("/privacy-policy")}
+              className="hover:text-[#C6A45C] cursor-pointer"
             >
               Privacy Policy
             </button>
             <button
               onClick={() => goTo("/terms-of-use")}
-              className="text-#90A1B9 hover:text-[#C6A45C] transition-colors uppercase cursor-pointer"
+              className="hover:text-[#C6A45C] cursor-pointer"
             >
-              Terms of Use
+              Terms & Conditions
             </button>
           </div>
         </div>
@@ -266,50 +244,46 @@ const Footer = memo(function Footer() {
       <AnimatePresence>
         {openNewsletter && (
           <motion.div
-            className="fixed inset-0 bg-black/95 backdrop-blur-md z-[999] flex justify-center items-center p-6"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <motion.div
-              role="dialog"
-              aria-modal="true"
-              className="bg-white max-w-md w-full p-8 md:p-12 relative rounded-sm shadow-2xl"
-              initial={{ scale: prefersReducedMotion ? 1 : 0.9, opacity: 0 }}
+              className="bg-white max-w-md w-full p-8 md:p-10 relative shadow-2xl border-t-4"
+              style={{ borderColor: GOLD_COLOR }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: prefersReducedMotion ? 1 : 0.9, opacity: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
             >
               <button
                 onClick={() => setOpenNewsletter(false)}
-                className="absolute right-6 top-6 text-slate-400 hover:text-black transition-colors cursor-pointer"
-                aria-label="Close modal"
+                className="absolute right-4 top-4 text-slate-400 hover:text-slate-900 cursor-pointer"
               >
-                <CloseIcon size={24} />
+                <CloseIcon size={20} />
               </button>
 
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-serif mb-2 text-slate-900">
-                  Join the Club
+                  The Galaxy Club
                 </h2>
-                <p className="text-slate-500 text-sm">
-                  Experience luxury in your inbox.
+                <p className="text-slate-500 text-sm italic">
+                  Sign up for member-only privileges.
                 </p>
               </div>
 
               <form onSubmit={handleSubscribe} className="space-y-6">
-                <div className="space-y-2">
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    placeholder="Email Address"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full border-b-2 border-slate-100 py-3 outline-none focus:border-[#C6A45C] transition-colors text-slate-800 bg-transparent"
-                  />
-                </div>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="Your Email Address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full border-b border-slate-200 py-3 outline-none focus:border-[#C6A45C] transition-colors text-slate-800 bg-transparent text-sm"
+                />
 
-                <label className="flex items-start gap-3 cursor-pointer group">
+                <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     name="agree"
@@ -318,32 +292,19 @@ const Footer = memo(function Footer() {
                     onChange={handleChange}
                     className="mt-1 accent-[#C6A45C] cursor-pointer"
                   />
-                  <span className="text-[11px] leading-relaxed text-slate-500 group-hover:text-slate-700">
-                    I agree to receive marketing communications and acknowledge
-                    the privacy policy.
+                  <span className="text-[10px] leading-relaxed text-slate-500 uppercase tracking-tighter text-left">
+                    I agree to the privacy policy and marketing communications.
                   </span>
                 </label>
 
-                <motion.button
+                <button
                   type="submit"
                   disabled={!formData.agree}
-                  whileHover={
-                    formData.agree && !prefersReducedMotion
-                      ? { scale: 1.02 }
-                      : {}
-                  }
-                  whileTap={
-                    formData.agree && !prefersReducedMotion
-                      ? { scale: 0.98 }
-                      : {}
-                  }
-                  className="w-full py-4 text-[10px] font-black tracking-[0.2em] text-white rounded-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
-                  style={{
-                    backgroundColor: formData.agree ? GOLD_COLOR : "#cbd5e1",
-                  }}
+                  className="w-full py-4 text-[10px] font-bold tracking-[0.2em] text-white disabled:bg-slate-300 transition-all cursor-pointer shadow-md"
+                  style={{ backgroundColor: formData.agree ? GOLD_COLOR : "" }}
                 >
-                  SUBMIT
-                </motion.button>
+                  JOIN NOW
+                </button>
               </form>
             </motion.div>
           </motion.div>

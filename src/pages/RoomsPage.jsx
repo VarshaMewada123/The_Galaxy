@@ -19,16 +19,24 @@ export default function RoomsPage() {
   return (
     <main className="min-h-screen bg-[#FAF9F6]">
       <RoomsHero />
-
-      <section className="sticky top-0 z-50 bg-[#F5F5F0]/80 backdrop-blur border-b border-[#D4AF37]/20 py-6">
+      <div className="sticky top-0 z-50 bg-[#FAF9F6]/80 backdrop-blur-md border-b border-[#C6A45C]/10 py-6">
         <RoomCategoryFilter
           categories={categories}
           active={filter}
           onChange={setFilter}
         />
-      </section>
+      </div>
 
-      <section className="container mx-auto py-24 px-6">
+      <section className="container mx-auto py-12 md:py-20 px-3 md:px-10 lg:px-20">
+        <div className="mb-10 md:mb-16 text-center">
+          <span className="text-[#C6A45C] tracking-[0.2em] md:tracking-[0.4em] text-[8px] md:text-[10px] font-bold uppercase block mb-2 md:mb-3">
+            Discover Comfort
+          </span>
+          <h2 className="text-2xl md:text-5xl font-serif text-gray-800 italic">
+            {filter === "All" ? "Our Luxury Suites" : `${filter} Collection`}
+          </h2>
+        </div>
+
         <RoomsGrid rooms={filteredRooms} />
       </section>
     </main>

@@ -43,6 +43,7 @@ export default function DiningSections() {
   const shouldReduceMotion = useReducedMotion();
   const [offers, setOffers] = useState([]);
   const [availability, setAvailability] = useState(null);
+  const menuSectionRef = useRef(null);
 
   const isOrderingAllowed = () => {
     if (!availability) return false;
@@ -61,6 +62,15 @@ export default function DiningSections() {
 
     return true;
   };
+
+  useEffect(() => {
+    if (menuSectionRef.current) {
+      window.scrollTo({
+        top: menuSectionRef.current.offsetTop - 100,
+        behavior: "smooth",
+      });
+    }
+  }, [activeCategory, searchQuery]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -115,7 +125,7 @@ export default function DiningSections() {
         (item) =>
           regex.test(item.name || "") ||
           regex.test(item.category?.name || "") ||
-          (query.includes("jain") && item.isJain === true)
+          (query.includes("jain") && item.isJain === true),
       );
     }
 
@@ -124,8 +134,7 @@ export default function DiningSections() {
     } else if (activeCategory !== "All") {
       return items.filter(
         (item) =>
-          item.category?.name?.toLowerCase() ===
-          activeCategory.toLowerCase()
+          item.category?.name?.toLowerCase() === activeCategory.toLowerCase(),
       );
     }
 
@@ -141,10 +150,26 @@ export default function DiningSections() {
     }
   };
 
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+  useEffect(() => {
+    if (menuSectionRef.current) {
+      window.scrollTo({
+        top: menuSectionRef.current.offsetTop - 100,
+        behavior: "smooth",
+      });
+    }
+  }, [activeCategory, debouncedSearch]);
+
   return (
     <main className="min-h-screen bg-[#FAFAFA] text-[#1A1A1A] selection:bg-[#C6A45C] selection:text-white py-10">
-    
-
       <section className="pt-8 pb-12 bg-white border-b border-gray-100 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
@@ -152,21 +177,6 @@ export default function DiningSections() {
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-[#02060c] tracking-tight">
                 What's on your mind?
               </h2>
-            </div>
-
-            <div className="hidden md:flex gap-4">
-              <button
-                onClick={() => scroll("left")}
-                className="p-3 border border-gray-200 rounded-full hover:bg-black hover:text-white transition-all duration-300 cursor-pointer disabled:opacity-30"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={() => scroll("right")}
-                className="p-3 border border-gray-200 rounded-full hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
-              >
-                <ChevronRight size={24} />
-              </button>
             </div>
           </div>
 
@@ -186,10 +196,7 @@ export default function DiningSections() {
             </div>
           </div>
 
-          <nav
-            ref={scrollRef}
-            className="flex gap-4 md:gap-8 lg:gap-12 overflow-x-auto no-scrollbar snap-x snap-mandatory scroll-smooth pb-4 px-2"
-          >
+          <nav className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6 justify-items-center pb-4 px-2">
             <CategoryCircle
               name="All"
               isActive={activeCategory === "All"}
@@ -208,7 +215,7 @@ export default function DiningSections() {
         </div>
       </section>
 
-      <section className="py-12 md:py-20">
+      <section ref={menuSectionRef} className="py-12 md:py-20">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
           <div className="mb-10 md:mb-16">
             <h2 className="text-xl md:text-3xl font-serif font-bold italic border-l-4 border-[#C6A45C] pl-5">
@@ -234,7 +241,7 @@ export default function DiningSections() {
                   initial={shouldReduceMotion ? "visible" : "hidden"}
                   animate="visible"
                   exit={{ opacity: 0, y: 10 }}
-                  className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 lg:gap-10"
+                  className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-8 lg:gap-10"
                 >
                   {filteredItems.map((dish) => (
                     <motion.div
@@ -243,10 +250,7 @@ export default function DiningSections() {
                       layout
                       className="h-full"
                     >
-                      <DishCard
-                        dish={dish}
-                        isDisabled={!isOrderingAllowed()}
-                      />
+                      <DishCard dish={dish} isDisabled={!isOrderingAllowed()} />
                     </motion.div>
                   ))}
                 </motion.div>
@@ -281,7 +285,7 @@ export default function DiningSections() {
               variants={containerVars}
               initial="hidden"
               animate="visible"
-              className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-2"
             >
               {combos.map((combo) => {
                 const comboDish = {
@@ -319,6 +323,9 @@ export default function DiningSections() {
       {offers.length > 0 && (
         <section className="py-20 bg-[#FDFCFB]">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12">
+            <h2 className="text-2xl md:text-3xl font-serif font-bold border-l-4 border-[#C6A45C] pl-4 mb-10">
+              Special Offers
+            </h2>
             <div className="grid grid-cols-1 gap-20">
               {offers.map((offer) => (
                 <div key={offer._id} className="group">
@@ -335,7 +342,7 @@ export default function DiningSections() {
                       variants={containerVars}
                       initial="hidden"
                       animate="visible"
-                      className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+                      className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4"
                     >
                       {offer.items.map((item) => {
                         const offerDish = {

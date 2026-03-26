@@ -9,7 +9,7 @@ import "swiper/css/effect-fade";
 
 export default function TestimonialSection() {
   return (
-    <section className="py-32 bg-white relative  ">
+    <section className="py-32 bg-[#FAF9F6] relative  ">
       <div className="container mx-auto px-4 text-center lg:mx-3">
         <Swiper
           modules={[Autoplay, EffectFade]}

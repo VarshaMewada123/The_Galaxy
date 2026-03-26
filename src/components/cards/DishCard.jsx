@@ -7,9 +7,10 @@ import { useState } from "react";
 export default function DishCard({ dish, index }) {
   const addItem = useCartStore((s) => s.addItem);
   const shouldReduceMotion = useReducedMotion();
-  const [quantity, setQuantity] = useState(dish.quantity ?? null);
 
-  const handleAddToCart = (e) => {
+  const [quantity, setQuantity] = useState(0);
+
+  const handleAdd = (e) => {
     e.stopPropagation();
 
     const price = dish.finalPrice ?? dish.price ?? dish.basePrice;
@@ -23,11 +24,22 @@ export default function DishCard({ dish, index }) {
     };
 
     addItem(payload);
-
-    if (quantity !== null && quantity > 0) {
-      setQuantity((q) => q - 1);
-    }
+    setQuantity(1);
   };
+
+  // ✅ INCREMENT
+  const increment = (e) => {
+    e.stopPropagation();
+    handleAdd(e);
+    setQuantity((q) => q + 1);
+  };
+
+  // ✅ DECREMENT
+  const decrement = (e) => {
+    e.stopPropagation();
+    setQuantity((q) => (q > 1 ? q - 1 : 0));
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
     visible: {
@@ -85,20 +97,36 @@ export default function DishCard({ dish, index }) {
           </div>
         )}
 
-        {/* ADD BUTTON */}
+        {/* 🔥 UPDATED ADD / COUNTER BUTTON */}
         <div className="absolute bottom-3 right-3">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleAddToCart}
-            disabled={quantity !== null && quantity === 0}
-            className="flex items-center gap-1 bg-white border border-gray-200 shadow-lg px-4 py-2 rounded-xl text-[#C6A45C] font-black uppercase text-[12px] tracking-wider hover:bg-gray-50 transition-colors cursor-pointer group/btn disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Add
-            <Plus
-              size={14}
-              className="group-hover/btn:rotate-90 transition-transform"
-            />
-          </motion.button>
+          {quantity === 0 ? (
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={handleAdd}
+              className="flex items-center gap-1 bg-white border border-gray-200 shadow-lg px-4 py-2 rounded-xl text-[#C6A45C] font-black uppercase text-[12px] tracking-wider hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              Add
+              <Plus size={14} />
+            </motion.button>
+          ) : (
+            <div className="flex items-center bg-white border border-gray-200 shadow-lg rounded-xl px-3 py-1">
+              <button
+                onClick={decrement}
+                className="text-[#C6A45C] font-bold text-lg px-2"
+              >
+                -
+              </button>
+
+              <span className="font-bold text-sm px-2">{quantity}</span>
+
+              <button
+                onClick={increment}
+                className="text-[#C6A45C] font-bold text-lg px-2"
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -108,7 +136,6 @@ export default function DishCard({ dish, index }) {
           <p className="text-[#C6A45C] text-[10px] md:text-[11px] uppercase tracking-[0.2em] font-bold truncate pr-2">
             {dish.category?.name || "Main Course"}
           </p>
-
 
           <div className="flex items-center gap-1 bg-green-50 px-1.5 py-0.5 rounded border border-green-100">
             <span className="text-[11px] font-bold text-green-700">
@@ -135,14 +162,12 @@ export default function DishCard({ dish, index }) {
           </p>
         )}
 
-        {/* SAVINGS */}
         {dish.savings > 0 && (
           <p className="text-green-600 text-xs font-semibold mb-1">
             Save ₹{dish.savings}
           </p>
         )}
 
-        {/* OFFER VALIDITY */}
         {dish.offer && (
           <p className="text-gray-400 text-[11px]">
             Valid till {new Date(dish.offer.endDate).toLocaleDateString()}

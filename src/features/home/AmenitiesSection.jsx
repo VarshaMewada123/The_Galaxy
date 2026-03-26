@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React from "react";
 import { Wifi, Dumbbell, Car, Coffee, Waves, ShieldCheck } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -67,21 +66,21 @@ const AmenityCard = ({ item, index }) => {
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       whileHover={{ y: -5, borderColor: "#C6A45C" }}
-      className="group relative flex flex-col h-full p-8 bg-white border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-[0_20px_40px_rgba(198,164,92,0.08)]"
+      className="group relative flex flex-col h-full p-5 md:p-8 bg-white border border-gray-100 rounded-2xl transition-all duration-300 hover:shadow-[0_20px_40px_rgba(198,164,92,0.08)]"
     >
-      <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-[#C6A45C]/10 mb-6 group-hover:bg-[#C6A45C] transition-colors duration-500">
+      <div className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[#C6A45C]/10 mb-4 md:mb-6 group-hover:bg-[#C6A45C] transition-colors duration-500">
         <Icon
           className="text-[#C6A45C] group-hover:text-white transition-colors duration-500"
           strokeWidth={1.5}
-          size={28}
+          size={24}
         />
       </div>
 
       <div className="flex-1">
-        <h3 className="text-xl font-bold text-gray-900 mb-3 tracking-tight">
+        <h3 className="text-base md:text-xl font-bold text-gray-900 mb-2 md:mb-3 tracking-tight">
           {item.title}
         </h3>
-        <p className="text-gray-600 leading-relaxed text-sm md:text-base lg:text-sm xl:text-base">
+        <p className="text-gray-600 leading-relaxed text-xs md:text-base lg:text-sm xl:text-base">
           {item.description}
         </p>
       </div>
@@ -132,7 +131,7 @@ export default function AmenitiesSection() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 xl:gap-8">
           {AMENITIES.map((item, index) => (
             <AmenityCard key={item.title} item={item} index={index} />
           ))}
